@@ -10,7 +10,7 @@ import ReactFlow, {
   Background,
   addEdge,
 } from "reactflow";
-import { Drawer, Card, Button } from "antd";
+import { Drawer, Card, Button, message, Modal, Input } from "antd";
 import { RightCircleTwoTone, PlusSquareTwoTone } from "@ant-design/icons";
 import axios from "axios";
 
@@ -136,6 +136,8 @@ const LayoutFlow = () => {
 const Flow = () => {
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [newNoteName, setNewNoteName] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
 
   // 查询笔记列表
   const fetchNotes = async () => {
@@ -164,12 +166,35 @@ const Flow = () => {
     setOpen(false);
   };
 
+  // 新增笔记
+  const addNote = async () => {
+    try {
+      const userId = sessionStorage.getItem("userId"); // 从session里取userId
+      const response = await axios.post(
+        `http://localhost:8080/sidebar/add?userId=${userId}&name=${newNoteName}`
+      );
+      const { code } = response.data;
+      if (code === 0) {
+        setNewNoteName("");
+        setModalVisible(false);
+        await fetchNotes(); // 新增笔记后重新查询笔记列表
+        message.success("新增成功");
+      } else if (code === 1) {
+        message.error("该笔记已存在");
+      } else {
+        console.error(response.data.message);
+      }
+    } catch (error) {
+      console.error("新增笔记失败", error);
+    }
+  };
+
   return (
     <div className="app-container">
       <ReactFlowProvider>
         <div className="flow-container">
           <div className="icon-container" onClick={showDrawer}>
-            <RightCircleTwoTone style={{ fontSize: "24px" }} />
+            <RightCircleTwoTone style={{ fontSize: "30px" }} />
           </div>
           <LayoutFlow />
         </div>
@@ -194,7 +219,7 @@ const Flow = () => {
             <span style={{ width: "70%" }}>笔记列表</span>
             <PlusSquareTwoTone
               style={{ fontSize: "30px", cursor: "pointer" }}
-              onClick={() => console.log("新增笔记")}
+              onClick={() => setModalVisible(true)}
             />
           </div>
         }
@@ -209,6 +234,18 @@ const Flow = () => {
           </Card>
         ))}
       </Drawer>
+      <Modal
+        title="新增笔记"
+        open={modalVisible}
+        onOk={addNote}
+        onCancel={() => setModalVisible(false)}
+      >
+        <Input
+          placeholder="请输入笔记名称"
+          value={newNoteName}
+          onChange={(e) => setNewNoteName(e.target.value)}
+        />
+      </Modal>
     </div>
   );
 };
