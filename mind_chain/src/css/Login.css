@@ -1,0 +1,14 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-container .ant-form {
+  width: 300px;
+}
+
+.register-link {
+  float: right;
+}
