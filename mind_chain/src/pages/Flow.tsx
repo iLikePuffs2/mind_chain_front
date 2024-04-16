@@ -3,7 +3,7 @@ import { message } from "antd";
 import { RightCircleTwoTone } from "@ant-design/icons";
 import axios from "axios";
 import ReactFlow, { ReactFlowProvider, useNodesState, useEdgesState } from "reactflow";
-import LayoutFlow,{ getLayoutedElements } from "../component/LayoutFlow";
+import LayoutFlow, { getLayoutedElements } from "../component/LayoutFlow";
 import SidebarDrawer from "../component/SidebarDrawer";
 import NoteModal from "../component/NoteModal";
 import "../css/Flow.css";
@@ -175,6 +175,11 @@ const Flow = () => {
     }
   };
 
+  const handleNoteClick = async (userId, noteId) => {
+    await fetchNoteDetail(userId, noteId);
+    setOpen(false); // 关闭抽屉
+  };
+
   const onLayout = useCallback(() => {
     const layouted = getLayoutedElements(nodes, edges);
 
@@ -211,7 +216,7 @@ const Flow = () => {
         open={open}
         onClose={onClose}
         notes={notes}
-        onNoteClick={(userId, noteId) => fetchNoteDetail(userId, noteId)}
+        onNoteClick={handleNoteClick}
         onRenameClick={(name) => handleRename(name)}
         onDeleteClick={(name) => deleteNote(name)}
         onAddNoteClick={() => setModalVisible(true)}
