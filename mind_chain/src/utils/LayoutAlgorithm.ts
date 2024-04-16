@@ -22,7 +22,7 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
 
   // 创建一个type为'input'的根节点
   const rootNode: Node = {
-    id: 'root',
+    id: '0',
     type: 'input',
     data: { label: 'Root' },
     position: { x: 0, y: 0 },

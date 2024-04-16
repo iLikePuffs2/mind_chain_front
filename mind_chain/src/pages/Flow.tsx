@@ -22,7 +22,6 @@ const initialEdges = [];
 const Flow = () => {
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
-  const [rootNode, setRootNode] = useState(null);
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const [newNoteName, setNewNoteName] = useState("");
@@ -30,6 +29,14 @@ const Flow = () => {
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [renameNoteName, setRenameNoteName] = useState("");
   const [selectedNoteName, setSelectedNoteName] = useState("");
+
+  // 根节点的初始值
+  const [rootNode, setRootNode] = useState({
+    id: '0',
+    data: { label: '未命名笔记' },
+    position: { x: 0, y: 0 },
+    type: 'input',
+  });
 
   const onNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -53,7 +60,7 @@ const Flow = () => {
 
       // 如果连线的起点是根节点,则将 source 设置为 'root'
       if (params.source === rootNode.id) {
-        newEdge.source = "root";
+        newEdge.source = "0";
       }
 
       // 如果连线的终点是新增节点,则将 target 设置为新节点的 id
@@ -243,16 +250,16 @@ const Flow = () => {
         setNodes(initialNodes);
         setEdges(
           nodeList.map((node) => ({
-            id: `e${node.id}-${node.parentId || "root"}`,
-            source: node.parentId ? node.parentId.toString() : "root",
+            id: `e${node.id}-${node.parentId || '0'}`,
+            source: node.parentId ? node.parentId.toString() : '0',
             target: node.id.toString(),
           }))
         );
         setRootNode({
-          id: "root",
-          data: { label: note ? note.name : "未命名笔记" },
+          id: '0',
+          data: { label: note ? note.name : '未命名笔记' },
           position: { x: 0, y: 0 },
-          type: "input",
+          type: 'input',
         });
       } else {
         console.error("获取笔记详情失败");
