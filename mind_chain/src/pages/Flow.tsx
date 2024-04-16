@@ -1,17 +1,18 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { message } from 'antd';
-import { RightCircleTwoTone } from '@ant-design/icons';
-import axios from 'axios';
+import React, { useCallback, useState, useEffect } from "react";
+import { message } from "antd";
+import { RightCircleTwoTone } from "@ant-design/icons";
+import axios from "axios";
 import ReactFlow, {
   ReactFlowProvider,
   useNodesState,
   useEdgesState,
-} from 'reactflow';
-import LayoutFlow from '../component/LayoutFlow';
-import SidebarDrawer from '../component/SidebarDrawer';
-import NoteModal from '../component/NoteModal';
-import '../css/Flow.css';
-import { Note } from '../model/note';
+} from "reactflow";
+import LayoutFlow from "../component/LayoutFlow";
+import SidebarDrawer from "../component/SidebarDrawer";
+import NoteModal from "../component/NoteModal";
+import "../css/Flow.css";
+import { Note } from "../model/note";
+import { getLayoutedElements } from "../utils/layout";
 
 const initialNodes = [];
 const initialEdges = [];
@@ -22,14 +23,43 @@ const Flow = () => {
   const [rootNode, setRootNode] = useState(null);
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
-  const [newNoteName, setNewNoteName] = useState('');
+  const [newNoteName, setNewNoteName] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [renameModalVisible, setRenameModalVisible] = useState(false);
-  const [renameNoteName, setRenameNoteName] = useState('');
-  const [selectedNoteName, setSelectedNoteName] = useState('');
+  const [renameNoteName, setRenameNoteName] = useState("");
+  const [selectedNoteName, setSelectedNoteName] = useState("");
+
+  const onLayout = useCallback(() => {
+    // 重新排布节点
+    setNodes((prevNodes) => {
+      const layouted = getLayoutedElements(prevNodes, edges);
+      return [...layouted.nodes];
+    });
+  }, [edges, setNodes]);
+
+  // 检查是否存在重叠的节点
+  const hasOverlappingNodes = (nodes) => {
+    const nodePositions = new Set();
+    for (const node of nodes) {
+      const { x, y } = node.position;
+      const position = `${x},${y}`;
+      if (nodePositions.has(position)) {
+        return true; // 存在重叠的节点
+      }
+      nodePositions.add(position);
+    }
+    return false; // 没有重叠的节点
+  };
+
+  // 在节点发生变化时检查是否存在重叠的节点
+  useEffect(() => {
+    if (hasOverlappingNodes(nodes)) {
+      onLayout();
+    }
+  }, [nodes, onLayout]);
 
   useEffect(() => {
-    const userId = sessionStorage.getItem('userId');
+    const userId = sessionStorage.getItem("userId");
     if (userId) {
       fetchNoteDetail(userId);
     }
@@ -38,7 +68,7 @@ const Flow = () => {
   // 查询笔记列表
   const fetchNotes = async () => {
     try {
-      const userId = sessionStorage.getItem('userId'); // 从session里取userId
+      const userId = sessionStorage.getItem("userId"); // 从session里取userId
       const response = await axios.get(
         `http://localhost:8080/sidebar/list?userId=${userId}`
       );
@@ -46,10 +76,10 @@ const Flow = () => {
       if (code === 0) {
         setNotes(data);
       } else {
-        console.error('查询笔记列表失败');
+        console.error("查询笔记列表失败");
       }
     } catch (error) {
-      console.error('查询笔记列表失败', error);
+      console.error("查询笔记列表失败", error);
     }
   };
 
@@ -65,72 +95,72 @@ const Flow = () => {
   // 新增笔记
   const addNote = async () => {
     try {
-      const userId = sessionStorage.getItem('userId'); // 从session里取userId
+      const userId = sessionStorage.getItem("userId"); // 从session里取userId
       const response = await axios.post(
         `http://localhost:8080/sidebar/add?userId=${userId}&name=${newNoteName}`
       );
       const { code } = response.data;
       if (code === 0) {
-        setNewNoteName('');
+        setNewNoteName("");
         setModalVisible(false);
         await fetchNotes(); // 新增笔记后重新查询笔记列表
-        message.success('新增成功');
+        message.success("新增成功");
       } else if (code === 1) {
-        message.error('该笔记已存在');
+        message.error("该笔记已存在");
       } else {
         console.error(response.data.message);
       }
     } catch (error) {
-      console.error('新增笔记失败', error);
+      console.error("新增笔记失败", error);
     }
   };
 
-// 删除笔记
-const deleteNote = async (name) => {
-  try {
-    const userId = sessionStorage.getItem('userId');
-    const response = await axios.delete(
-      `http://localhost:8080/sidebar/delete?userId=${userId}&name=${name}`
-    );
-    const { code } = response.data;
-    if (code === 0) {
-      await fetchNotes();
-      message.success('删除成功');
-      // 删除成功后，重新获取笔记详情，刷新Flow界面
-      await fetchNoteDetail(userId);
-    } else {
-      console.error(response.data.message);
+  // 删除笔记
+  const deleteNote = async (name) => {
+    try {
+      const userId = sessionStorage.getItem("userId");
+      const response = await axios.delete(
+        `http://localhost:8080/sidebar/delete?userId=${userId}&name=${name}`
+      );
+      const { code } = response.data;
+      if (code === 0) {
+        await fetchNotes();
+        message.success("删除成功");
+        // 删除成功后，重新获取笔记详情，刷新Flow界面
+        await fetchNoteDetail(userId);
+      } else {
+        console.error(response.data.message);
+      }
+    } catch (error) {
+      console.error("删除笔记失败", error);
     }
-  } catch (error) {
-    console.error('删除笔记失败', error);
-  }
-};
+  };
 
   // 笔记重命名
   const renameNote = async (oldName, newName) => {
     try {
-      const userId = sessionStorage.getItem('userId');
+      const userId = sessionStorage.getItem("userId");
       const response = await axios.put(
         `http://localhost:8080/sidebar/rename?userId=${userId}&oldName=${oldName}&newName=${newName}`
       );
       const { code, message: msg } = response.data;
       if (code === 0) {
         await fetchNotes();
-        message.success('重命名成功');
+        message.success("重命名成功");
       } else if (code === 1) {
         message.error(msg); // 显示"笔记已存在"的错误消息
       } else {
         message.error(msg); // 显示"未找到指定笔记"的错误消息
       }
     } catch (error) {
-      console.error('笔记重命名失败', error);
-      message.error('笔记重命名失败'); // 显示通用的错误消息
+      console.error("笔记重命名失败", error);
+      message.error("笔记重命名失败"); // 显示通用的错误消息
     }
   };
 
   const handleRename = (name) => {
     setSelectedNoteName(name);
-    setRenameNoteName(''); // 将 renameNoteName 设置为空字符串
+    setRenameNoteName(""); // 将 renameNoteName 设置为空字符串
     setRenameModalVisible(true);
   };
 
@@ -142,7 +172,7 @@ const deleteNote = async (name) => {
   // 查询笔记详情
   const fetchNoteDetail = async (userId, noteId) => {
     try {
-      let url = '';
+      let url = "";
       if (noteId) {
         url = `http://localhost:8080/graph/detail?noteId=${noteId}&userId=${userId}`;
       } else {
@@ -163,22 +193,22 @@ const deleteNote = async (name) => {
         setNodes(initialNodes);
         setEdges(
           nodeList.map((node) => ({
-            id: `e${node.id}-${node.parentId || 'root'}`,
-            source: node.parentId ? node.parentId.toString() : 'root',
+            id: `e${node.id}-${node.parentId || "root"}`,
+            source: node.parentId ? node.parentId.toString() : "root",
             target: node.id.toString(),
           }))
         );
         setRootNode({
-          id: 'root',
-          data: { label: note ? note.name : '未命名笔记' },
+          id: "root",
+          data: { label: note ? note.name : "未命名笔记" },
           position: { x: 0, y: 0 },
-          type: 'input',
+          type: "input",
         });
       } else {
-        console.error('获取笔记详情失败');
+        console.error("获取笔记详情失败");
       }
     } catch (error) {
-      console.error('获取笔记详情失败', error);
+      console.error("获取笔记详情失败", error);
     }
   };
 
@@ -187,20 +217,12 @@ const deleteNote = async (name) => {
     setOpen(false); // 关闭抽屉
   };
 
-  const onLayout = useCallback(() => {
-    // 重新排布节点
-    setNodes((prevNodes) => {
-      const layouted = getLayoutedElements(prevNodes, edges);
-      return [...layouted.nodes];
-    });
-  }, [edges, setNodes]);
-
   return (
     <div className="app-container">
       <ReactFlowProvider>
         <div className="flow-container">
           <div className="icon-container" onClick={showDrawer}>
-            <RightCircleTwoTone style={{ fontSize: '30px' }} />
+            <RightCircleTwoTone style={{ fontSize: "30px" }} />
           </div>
           <LayoutFlow
             nodes={nodes}
