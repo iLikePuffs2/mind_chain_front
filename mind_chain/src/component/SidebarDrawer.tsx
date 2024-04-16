@@ -3,7 +3,17 @@ import { Drawer, Card, Dropdown, Menu } from "antd";
 import { EllipsisOutlined, PlusSquareTwoTone } from "@ant-design/icons";
 import { Note } from "../model/note";
 
-const SidebarDrawer = ({
+interface SidebarDrawerProps {
+  open: boolean;
+  onClose: () => void;
+  notes: Note[];
+  onNoteClick: (userId: string, noteId: string) => void;
+  onRenameClick: (name: string) => void;
+  onDeleteClick: (name: string) => Promise<void>;
+  onAddNoteClick: () => void;
+}
+
+const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
   open,
   onClose,
   notes,
@@ -12,6 +22,12 @@ const SidebarDrawer = ({
   onDeleteClick,
   onAddNoteClick,
 }) => {
+  // 处理删除笔记
+  const handleDeleteNote = async (name: string) => {
+    await onDeleteClick(name);
+    onClose(); // 关闭抽屉
+  };
+
   return (
     <Drawer
       title={
@@ -56,7 +72,7 @@ const SidebarDrawer = ({
                     <Menu.Item onClick={() => onRenameClick(note.name)}>
                       重命名
                     </Menu.Item>
-                    <Menu.Item onClick={() => onDeleteClick(note.name)}>
+                    <Menu.Item onClick={() => handleDeleteNote(note.name)}>
                       删除
                     </Menu.Item>
                   </Menu>

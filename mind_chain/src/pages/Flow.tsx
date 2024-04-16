@@ -85,24 +85,26 @@ const Flow = () => {
     }
   };
 
-  // 删除笔记
-  const deleteNote = async (name) => {
-    try {
-      const userId = sessionStorage.getItem('userId');
-      const response = await axios.delete(
-        `http://localhost:8080/sidebar/delete?userId=${userId}&name=${name}`
-      );
-      const { code } = response.data;
-      if (code === 0) {
-        await fetchNotes();
-        message.success('删除成功');
-      } else {
-        console.error(response.data.message);
-      }
-    } catch (error) {
-      console.error('删除笔记失败', error);
+// 删除笔记
+const deleteNote = async (name) => {
+  try {
+    const userId = sessionStorage.getItem('userId');
+    const response = await axios.delete(
+      `http://localhost:8080/sidebar/delete?userId=${userId}&name=${name}`
+    );
+    const { code } = response.data;
+    if (code === 0) {
+      await fetchNotes();
+      message.success('删除成功');
+      // 删除成功后，重新获取笔记详情，刷新Flow界面
+      await fetchNoteDetail(userId);
+    } else {
+      console.error(response.data.message);
     }
-  };
+  } catch (error) {
+    console.error('删除笔记失败', error);
+  }
+};
 
   // 笔记重命名
   const renameNote = async (oldName, newName) => {
