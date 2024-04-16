@@ -1,3 +1,4 @@
+/* 两个按钮的组件：新增节点和重新排布 */
 import React, { useCallback } from 'react';
 import ReactFlow, {
   useNodesState,
@@ -8,9 +9,9 @@ import ReactFlow, {
   Panel,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { getLayoutedElements } from '../utils/layout';
+import { LayoutAlgorithm } from '../utils/LayoutAlgorithm';
 
-const LayoutFlow = ({
+const FlowButton = ({
   nodes,
   setNodes,
   edges,
@@ -38,7 +39,7 @@ const LayoutFlow = ({
   };
 
   const handleLayout = () => {
-    const layouted = getLayoutedElements(nodes, edges);
+    const layouted = LayoutAlgorithm(nodes, edges);
     setNodes([...layouted.nodes]);
     setEdges([...layouted.edges]);
   };
@@ -64,4 +65,4 @@ const LayoutFlow = ({
   );
 };
 
-export default LayoutFlow;
+export default FlowButton;

@@ -7,12 +7,12 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
 } from "reactflow";
-import LayoutFlow from "../component/LayoutFlow";
+import FlowButton from "../component/FlowButton";
 import SidebarDrawer from "../component/SidebarDrawer";
-import NoteModal from "../component/NoteModal";
+import AddNotePop from "../component/AddNotePop";
 import "../css/Flow.css";
 import { Note } from "../model/note";
-import { getLayoutedElements } from "../utils/layout";
+import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
 
 const initialNodes = [];
 const initialEdges = [];
@@ -32,7 +32,7 @@ const Flow = () => {
   const onLayout = useCallback(() => {
     // 重新排布节点
     setNodes((prevNodes) => {
-      const layouted = getLayoutedElements(prevNodes, edges);
+      const layouted = LayoutAlgorithm(prevNodes, edges);
       return [...layouted.nodes];
     });
   }, [edges, setNodes]);
@@ -224,7 +224,7 @@ const Flow = () => {
           <div className="icon-container" onClick={showDrawer}>
             <RightCircleTwoTone style={{ fontSize: "30px" }} />
           </div>
-          <LayoutFlow
+          <FlowButton
             nodes={nodes}
             setNodes={setNodes}
             edges={edges}
@@ -253,7 +253,7 @@ const Flow = () => {
         onDeleteClick={(name) => deleteNote(name)}
         onAddNoteClick={() => setModalVisible(true)}
       />
-      <NoteModal
+      <AddNotePop
         visible={modalVisible}
         title="新增笔记"
         onOk={addNote}
@@ -261,7 +261,7 @@ const Flow = () => {
         value={newNoteName}
         onChange={(e) => setNewNoteName(e.target.value)}
       />
-      <NoteModal
+      <AddNotePop
         visible={renameModalVisible}
         title="重命名笔记"
         onOk={handleConfirmRename}

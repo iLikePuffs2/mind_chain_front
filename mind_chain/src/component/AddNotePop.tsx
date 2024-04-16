@@ -1,7 +1,8 @@
+/* 新增笔记的弹窗 */
 import React from "react";
 import { Modal, Input } from "antd";
 
-const NoteModal = ({
+const AddNotePop = ({
   visible,
   title,
   onOk,
@@ -25,4 +26,4 @@ const NoteModal = ({
   );
 };
 
-export default NoteModal;
+export default AddNotePop;

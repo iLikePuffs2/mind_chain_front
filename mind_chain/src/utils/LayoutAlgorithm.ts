@@ -1,3 +1,4 @@
+/* 节点和线段排布的算法脚本，用于计算每个节点的新位置，返回值为带有位置信息的节点数组 */
 import { type Node, type Edge } from 'reactflow';
 import { hierarchy, tree } from 'd3-hierarchy';
 import { type HierarchyPointNode } from 'd3-hierarchy';
@@ -8,7 +9,7 @@ type NodeWithPosition = Node & { x: number; y: number };
 
 const layout = tree<NodeWithPosition>().separation(() => 1);
 
-export const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
+export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
   // 如果节点数组为空,直接返回原始的节点和边
   if (nodes.length === 0) {
     return { nodes, edges };
