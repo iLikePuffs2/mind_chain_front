@@ -14,6 +14,7 @@ import AddNotePop from "../component/AddNotePop";
 import "../css/Flow.css";
 import { Note } from "../model/note";
 import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
+import { CustomEdge } from "../component/CustomEdge";
 
 const initialNodes = [];
 const initialEdges = [];
@@ -44,7 +45,10 @@ const Flow = () => {
     (params) => {
       const newEdge = {
         ...params,
-        type: "smoothstep",
+        type: "custom",
+        data: {
+          component: CustomEdge,
+        },
       };
 
       // 如果连线的起点是根节点,则将 source 设置为 'root'
@@ -84,6 +88,18 @@ const Flow = () => {
     }
     return false; // 没有重叠的节点
   };
+
+  useEffect(() => {
+    setEdges((eds) =>
+      eds.map((edge) => ({
+        ...edge,
+        type: 'custom',
+        data: {
+          component: CustomEdge,
+        },
+      }))
+    );
+  }, []);
 
   // 在节点发生变化时检查是否存在重叠的节点
   useEffect(() => {
