@@ -10,8 +10,21 @@ import ReactFlow, {
   Background,
   addEdge,
 } from "reactflow";
-import { Drawer, Card, Button, message, Modal, Input } from "antd";
-import { RightCircleTwoTone, PlusSquareTwoTone } from "@ant-design/icons";
+import {
+  Drawer,
+  Card,
+  Button,
+  message,
+  Modal,
+  Input,
+  Dropdown,
+  Menu,
+} from "antd";
+import {
+  RightCircleTwoTone,
+  PlusSquareTwoTone,
+  EllipsisOutlined,
+} from "@ant-design/icons";
 import axios from "axios";
 
 import "reactflow/dist/style.css";
@@ -138,6 +151,9 @@ const Flow = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [newNoteName, setNewNoteName] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [renameModalVisible, setRenameModalVisible] = useState(false);
+  const [renameNoteName, setRenameNoteName] = useState("");
+  const [selectedNoteName, setSelectedNoteName] = useState("");
 
   // 查询笔记列表
   const fetchNotes = async () => {
@@ -189,6 +205,58 @@ const Flow = () => {
     }
   };
 
+  // 删除笔记
+  const deleteNote = async (name) => {
+    try {
+      const userId = sessionStorage.getItem("userId");
+      const response = await axios.delete(
+        `http://localhost:8080/sidebar/delete?userId=${userId}&name=${name}`
+      );
+      const { code } = response.data;
+      if (code === 0) {
+        await fetchNotes();
+        message.success("删除成功");
+      } else {
+        console.error(response.data.message);
+      }
+    } catch (error) {
+      console.error("删除笔记失败", error);
+    }
+  };
+
+  // 笔记重命名
+  const renameNote = async (oldName, newName) => {
+    try {
+      const userId = sessionStorage.getItem("userId");
+      const response = await axios.put(
+        `http://localhost:8080/sidebar/rename?userId=${userId}&oldName=${oldName}&newName=${newName}`
+      );
+      const { code, message: msg } = response.data;
+      if (code === 0) {
+        await fetchNotes();
+        message.success("重命名成功");
+      } else if (code === 1) {
+        message.error(msg); // 显示"笔记已存在"的错误消息
+      } else {
+        message.error(msg); // 显示"未找到指定笔记"的错误消息
+      }
+    } catch (error) {
+      console.error("笔记重命名失败", error);
+      message.error("笔记重命名失败"); // 显示通用的错误消息
+    }
+  };
+
+  const handleRename = (name) => {
+    setSelectedNoteName(name);
+    setRenameNoteName(""); // 将 renameNoteName 设置为空字符串
+    setRenameModalVisible(true);
+  };
+
+  const handleConfirmRename = async () => {
+    await renameNote(selectedNoteName, renameNoteName);
+    setRenameModalVisible(false);
+  };
+
   return (
     <div className="app-container">
       <ReactFlowProvider>
@@ -230,7 +298,30 @@ const Flow = () => {
       >
         {notes.map((note) => (
           <Card key={note.id} style={{ marginBottom: 16 }}>
-            {note.name}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span>{note.name}</span>
+              <Dropdown
+                overlay={
+                  <Menu>
+                    <Menu.Item onClick={() => handleRename(note.name)}>
+                      重命名
+                    </Menu.Item>
+                    <Menu.Item onClick={() => deleteNote(note.name)}>
+                      删除
+                    </Menu.Item>
+                  </Menu>
+                }
+                trigger={["click"]}
+              >
+                <EllipsisOutlined style={{ fontSize: "20px" }} />
+              </Dropdown>
+            </div>
           </Card>
         ))}
       </Drawer>
@@ -244,6 +335,18 @@ const Flow = () => {
           placeholder="请输入笔记名称"
           value={newNoteName}
           onChange={(e) => setNewNoteName(e.target.value)}
+        />
+      </Modal>
+      <Modal
+        title="重命名笔记"
+        open={renameModalVisible}
+        onOk={handleConfirmRename}
+        onCancel={() => setRenameModalVisible(false)}
+      >
+        <Input
+          placeholder="请输入新的笔记名称"
+          value={renameNoteName}
+          onChange={(e) => setRenameNoteName(e.target.value)}
         />
       </Modal>
     </div>
