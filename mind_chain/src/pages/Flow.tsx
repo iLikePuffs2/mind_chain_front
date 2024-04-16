@@ -1,116 +1,16 @@
-import Dagre from "@dagrejs/dagre";
 import React, { useCallback, useState, useEffect } from "react";
-import ReactFlow, {
-  ReactFlowProvider,
-  Panel,
-  useNodesState,
-  useEdgesState,
-  useReactFlow,
-  Controls,
-  Background,
-  addEdge,
-} from "reactflow";
-import {
-  Drawer,
-  Card,
-  Button,
-  message,
-  Modal,
-  Input,
-  Dropdown,
-  Menu,
-} from "antd";
-import {
-  RightCircleTwoTone,
-  PlusSquareTwoTone,
-  EllipsisOutlined,
-} from "@ant-design/icons";
+import { message } from "antd";
+import { RightCircleTwoTone } from "@ant-design/icons";
 import axios from "axios";
-
-import "reactflow/dist/style.css";
+import ReactFlow, { ReactFlowProvider, useNodesState, useEdgesState } from "reactflow";
+import LayoutFlow,{ getLayoutedElements } from "../component/LayoutFlow";
+import SidebarDrawer from "../component/SidebarDrawer";
+import NoteModal from "../component/NoteModal";
 import "../css/Flow.css";
 import { Note } from "../model/note";
 
 const initialNodes = [];
 const initialEdges = [];
-
-const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-
-const getLayoutedElements = (nodes, edges) => {
-  g.setGraph({ rankdir: "TB" });
-
-  edges.forEach((edge) => g.setEdge(edge.source, edge.target));
-  nodes.forEach((node) => g.setNode(node.id, node));
-
-  Dagre.layout(g);
-
-  return {
-    nodes: nodes.map((node) => {
-      const { x, y } = g.node(node.id);
-
-      return { ...node, position: { x, y } };
-    }),
-    edges,
-  };
-};
-
-const LayoutFlow = ({
-  nodes,
-  edges,
-  rootNode,
-  onNodesChange,
-  onEdgesChange,
-}) => {
-  const { fitView } = useReactFlow();
-
-  const onLayout = useCallback(() => {
-    const layouted = getLayoutedElements(nodes, edges);
-
-    setNodes([...layouted.nodes]);
-    setEdges([...layouted.edges]);
-
-    window.requestAnimationFrame(() => {
-      fitView();
-    });
-  }, [nodes, edges, fitView]);
-
-  const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
-    []
-  );
-
-  const handleAddNode = () => {
-    const lastNodeId =
-      nodes.length > 0 ? parseInt(nodes[nodes.length - 1].id) : 0;
-    const newNodeId = (lastNodeId + 1).toString();
-    const newNode = {
-      id: newNodeId,
-      data: { label: newNodeId },
-      position: { x: 100, y: 100 },
-    };
-    setNodes((prevNodes) => [...prevNodes, newNode]);
-  };
-
-  return (
-    <div style={{ height: "100%" }}>
-      <ReactFlow
-        nodes={rootNode ? [rootNode, ...nodes] : nodes}
-        onNodesChange={onNodesChange}
-        edges={edges}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        fitView
-      >
-        <Background />
-        <Controls />
-        <Panel position="top-right">
-          <button onClick={onLayout}>重新排布</button>
-          <button onClick={handleAddNode}>新增节点</button>
-        </Panel>
-      </ReactFlow>
-    </div>
-  );
-};
 
 const Flow = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -233,6 +133,7 @@ const Flow = () => {
     setRenameModalVisible(false);
   };
 
+  // 查询笔记详情
   const fetchNoteDetail = async (userId, noteId) => {
     try {
       let url = "";
@@ -248,7 +149,7 @@ const Flow = () => {
         setNodes(
           nodeList.map((node) => ({
             id: node.id.toString(),
-            data: { label: node.name },
+            data: { label: node.name, ...node },
             position: { x: 0, y: 0 },
           }))
         );
@@ -274,6 +175,13 @@ const Flow = () => {
     }
   };
 
+  const onLayout = useCallback(() => {
+    const layouted = getLayoutedElements(nodes, edges);
+
+    setNodes([...layouted.nodes]);
+    setEdges([...layouted.edges]);
+  }, [nodes, edges, setNodes, setEdges]);
+
   return (
     <div className="app-container">
       <ReactFlowProvider>
@@ -287,6 +195,7 @@ const Flow = () => {
             rootNode={rootNode}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
+            onLayout={onLayout}
           />
         </div>
       </ReactFlowProvider>
@@ -298,89 +207,31 @@ const Flow = () => {
         </div>
         <textarea className="text-input" />
       </div>
-      <Drawer
-        title={
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span style={{ width: "70%" }}>笔记列表</span>
-            <PlusSquareTwoTone
-              style={{ fontSize: "30px", cursor: "pointer" }}
-              onClick={() => setModalVisible(true)}
-            />
-          </div>
-        }
-        placement="left"
-        closable={false}
-        onClose={onClose}
+      <SidebarDrawer
         open={open}
-      >
-        {notes.map((note) => (
-          <Card key={note.id} style={{ marginBottom: 16 }}>
-            <div
-              onClick={() => {
-                const userId = sessionStorage.getItem("userId");
-                fetchNoteDetail(userId, note.id);
-                onClose();
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span>{note.name}</span>
-                <Dropdown
-                  overlay={
-                    <Menu>
-                      <Menu.Item onClick={() => handleRename(note.name)}>
-                        重命名
-                      </Menu.Item>
-                      <Menu.Item onClick={() => deleteNote(note.name)}>
-                        删除
-                      </Menu.Item>
-                    </Menu>
-                  }
-                  trigger={["click"]}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <EllipsisOutlined style={{ fontSize: "20px" }} />
-                </Dropdown>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </Drawer>
-      <Modal
+        onClose={onClose}
+        notes={notes}
+        onNoteClick={(userId, noteId) => fetchNoteDetail(userId, noteId)}
+        onRenameClick={(name) => handleRename(name)}
+        onDeleteClick={(name) => deleteNote(name)}
+        onAddNoteClick={() => setModalVisible(true)}
+      />
+      <NoteModal
+        visible={modalVisible}
         title="新增笔记"
-        open={modalVisible}
         onOk={addNote}
         onCancel={() => setModalVisible(false)}
-      >
-        <Input
-          placeholder="请输入笔记名称"
-          value={newNoteName}
-          onChange={(e) => setNewNoteName(e.target.value)}
-        />
-      </Modal>
-      <Modal
+        value={newNoteName}
+        onChange={(e) => setNewNoteName(e.target.value)}
+      />
+      <NoteModal
+        visible={renameModalVisible}
         title="重命名笔记"
-        open={renameModalVisible}
         onOk={handleConfirmRename}
         onCancel={() => setRenameModalVisible(false)}
-      >
-        <Input
-          placeholder="请输入新的笔记名称"
-          value={renameNoteName}
-          onChange={(e) => setRenameNoteName(e.target.value)}
-        />
-      </Modal>
+        value={renameNoteName}
+        onChange={(e) => setRenameNoteName(e.target.value)}
+      />
     </div>
   );
 };
