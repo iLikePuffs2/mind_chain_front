@@ -4,8 +4,9 @@ import { RightCircleTwoTone } from "@ant-design/icons";
 import axios from "axios";
 import ReactFlow, {
   ReactFlowProvider,
-  useNodesState,
-  useEdgesState,
+  applyNodeChanges,
+  applyEdgeChanges,
+  addEdge,
 } from "reactflow";
 import FlowButton from "../component/FlowButton";
 import SidebarDrawer from "../component/SidebarDrawer";
@@ -18,8 +19,8 @@ const initialNodes = [];
 const initialEdges = [];
 
 const Flow = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes] = useState(initialNodes);
+  const [edges, setEdges] = useState(initialEdges);
   const [rootNode, setRootNode] = useState(null);
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
@@ -28,6 +29,39 @@ const Flow = () => {
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [renameNoteName, setRenameNoteName] = useState("");
   const [selectedNoteName, setSelectedNoteName] = useState("");
+
+  const onNodesChange = useCallback(
+    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
+    []
+  );
+
+  const onEdgesChange = useCallback(
+    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+    []
+  );
+
+  const onConnect = useCallback(
+    (params) => {
+      const newEdge = {
+        ...params,
+        type: "smoothstep",
+      };
+
+      // 如果连线的起点是根节点,则将 source 设置为 'root'
+      if (params.source === rootNode.id) {
+        newEdge.source = "root";
+      }
+
+      // 如果连线的终点是新增节点,则将 target 设置为新节点的 id
+      const newNodeId = `${nodes.length + 1}`;
+      if (params.target === newNodeId) {
+        newEdge.target = newNodeId;
+      }
+
+      setEdges((eds) => addEdge(newEdge, eds));
+    },
+    [nodes, rootNode]
+  );
 
   const onLayout = useCallback(() => {
     // 重新排布节点
@@ -221,9 +255,7 @@ const Flow = () => {
     <div className="app-container">
       <ReactFlowProvider>
         <div className="flow-container">
-          <div className="icon-container" onClick={showDrawer}>
-            <RightCircleTwoTone style={{ fontSize: "30px" }} />
-          </div>
+          {/* ... */}
           <FlowButton
             nodes={nodes}
             setNodes={setNodes}
@@ -232,6 +264,7 @@ const Flow = () => {
             rootNode={rootNode}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
             onLayout={onLayout}
           />
         </div>
