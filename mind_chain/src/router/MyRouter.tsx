@@ -4,7 +4,7 @@ import Register from '../pages/Register';
 import { RouteObject, useRoutes } from "react-router-dom";
 
 const staticRoutes: RouteObject[] = [
-  { path: '/login', element: <Login /> },
+  { path: '/*', element: <Login /> },
   { path: '/flow', element: <Flow /> },
   { path: '/register', element: <Register /> },
   // ...
