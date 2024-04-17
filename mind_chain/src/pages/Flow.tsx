@@ -31,10 +31,10 @@ const Flow = () => {
 
   // 根节点的初始值
   const [rootNode, setRootNode] = useState({
-    id: '0',
-    data: { label: '未命名笔记' },
+    id: "0",
+    data: { label: "未命名笔记" },
     position: { x: 0, y: 0 },
-    type: 'input',
+    type: "input",
   });
 
   const onNodesChange = useCallback(
@@ -70,8 +70,8 @@ const Flow = () => {
     [nodes, rootNode]
   );
 
+  // 重新排布节点
   const onLayout = useCallback(() => {
-    // 重新排布节点
     setNodes((prevNodes) => {
       const layouted = LayoutAlgorithm(prevNodes, edges);
       return [...layouted.nodes];
@@ -96,7 +96,7 @@ const Flow = () => {
     setEdges((eds) =>
       eds.map((edge) => ({
         ...edge,
-        type: 'custom',
+        type: "custom",
       }))
     );
   }, []);
@@ -243,16 +243,16 @@ const Flow = () => {
         setNodes(initialNodes);
         setEdges(
           nodeList.map((node) => ({
-            id: `e${node.id}-${node.parentId || '0'}`,
-            source: node.parentId ? node.parentId.toString() : '0',
+            id: `e${node.id}-${node.parentId || "0"}`,
+            source: node.parentId ? node.parentId.toString() : "0",
             target: node.id.toString(),
           }))
         );
         setRootNode({
-          id: '0',
-          data: { label: note ? note.name : '未命名笔记' },
+          id: "0",
+          data: { label: note ? note.name : "未命名笔记" },
           position: { x: 0, y: 0 },
-          type: 'input',
+          type: "input",
         });
       } else {
         console.error("获取笔记详情失败");
@@ -270,6 +270,9 @@ const Flow = () => {
   return (
     <div className="app-container">
       <ReactFlowProvider>
+        <div className="icon-container" onClick={showDrawer}>
+          <RightCircleTwoTone style={{ fontSize: "30px" }} />
+        </div>
         <div className="flow-container">
           <FlowButton
             nodes={nodes}

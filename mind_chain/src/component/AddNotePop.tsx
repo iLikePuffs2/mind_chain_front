@@ -1,5 +1,4 @@
 /* 新增笔记的弹窗 */
-import React from "react";
 import { Modal, Input } from "antd";
 
 const AddNotePop = ({
