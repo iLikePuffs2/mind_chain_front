@@ -278,7 +278,6 @@ const Flow = () => {
     <div className="app-container">
       <ReactFlowProvider>
         <div className="flow-container">
-          {/* ... */}
           <FlowButton
             nodes={nodes}
             setNodes={setNodes}
