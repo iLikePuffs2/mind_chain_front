@@ -14,7 +14,6 @@ import AddNotePop from "../component/AddNotePop";
 import "../css/Flow.css";
 import { Note } from "../model/note";
 import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
-import { CustomEdge } from "../component/CustomEdge";
 
 const initialNodes = [];
 const initialEdges = [];
@@ -52,10 +51,7 @@ const Flow = () => {
     (params) => {
       const newEdge = {
         ...params,
-        type: "custom",
-        data: {
-          component: CustomEdge,
-        },
+        type: "default",
       };
 
       // 如果连线的起点是根节点,则将 source 设置为 'root'
@@ -101,9 +97,6 @@ const Flow = () => {
       eds.map((edge) => ({
         ...edge,
         type: 'custom',
-        data: {
-          component: CustomEdge,
-        },
       }))
     );
   }, []);
