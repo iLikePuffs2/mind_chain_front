@@ -28,7 +28,13 @@ function FlowButton({
 
   // 新增节点
   const addNode = () => {
-    const newNodeId = `node-${Date.now()}`;
+    // 找到当前节点中 id 最大的值
+    const maxId = nodes.reduce((max, node) => {
+      const nodeId = parseInt(node.id, 10);
+      return nodeId > max ? nodeId : max;
+    }, 0);
+
+    const newNodeId = `${maxId + 1}`;
     let newNodePosition = {
       x: rootNode.position.x + 200,
       y: rootNode.position.y,
@@ -48,9 +54,18 @@ function FlowButton({
       }
     } while (overlappingNode);
 
+    // 设置节点属性
     const newNode = {
       id: newNodeId,
-      data: { label: "新节点" },
+      data: {
+        label: "新节点",
+        id: maxId + 1,
+        noteId: 0,
+        name: "新节点",
+        level: 3,
+        status: 1,
+        blockedReason: 0,
+      },
       position: newNodePosition,
     };
 
