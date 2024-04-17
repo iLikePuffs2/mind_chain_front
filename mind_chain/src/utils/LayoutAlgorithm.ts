@@ -1,7 +1,7 @@
 /* 节点和线段排布的算法脚本，用于计算每个节点的新位置，返回值为带有位置信息的节点数组 */
-import { type Node, type Edge } from 'reactflow';
-import { hierarchy, tree } from 'd3-hierarchy';
-import { type HierarchyPointNode } from 'd3-hierarchy';
+import { type Node, type Edge } from "reactflow";
+import { hierarchy, tree } from "d3-hierarchy";
+import { type HierarchyPointNode } from "d3-hierarchy";
 
 const getPosition = (x: number, y: number) => ({ x, y });
 
@@ -20,11 +20,14 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
     .querySelector(`[data-id="${nodes[0].id}"]`)
     .getBoundingClientRect();
 
+  // 找到 nods数组里 type 为 'input' 的根节点
+  const originalRootNode = nodes.find((node) => node.type === "input");
+
   // 创建一个type为'input'的根节点
   const rootNode: Node = {
-    id: '0',
-    type: 'input',
-    data: { label: 'Root' },
+    id: "0",
+    type: "input",
+    data: originalRootNode ? originalRootNode.data : { label: "Root" },
     position: { x: 0, y: 0 },
   };
 

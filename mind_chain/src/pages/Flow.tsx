@@ -234,11 +234,20 @@ const Flow = () => {
         const { note, nodeList } = data;
 
         // 为节点设置初始位置信息
-        const initialNodes = nodeList.map((node) => ({
-          id: node.id.toString(),
-          data: { label: node.name, ...node },
-          position: { x: 0, y: 0 },
-        }));
+        const initialNodes = [
+          // 根节点
+          {
+            id: "0",
+            data: { label: note ? note.name : "未命名笔记" },
+            position: { x: 0, y: 0 },
+            type: "input",
+          },
+          ...nodeList.map((node) => ({
+            id: node.id.toString(),
+            data: { label: node.name, ...node },
+            position: { x: 0, y: 0 },
+          })),
+        ];
 
         setNodes(initialNodes);
         setEdges(
@@ -248,12 +257,6 @@ const Flow = () => {
             target: node.id.toString(),
           }))
         );
-        setRootNode({
-          id: "0",
-          data: { label: note ? note.name : "未命名笔记" },
-          position: { x: 0, y: 0 },
-          type: "input",
-        });
       } else {
         console.error("获取笔记详情失败");
       }
