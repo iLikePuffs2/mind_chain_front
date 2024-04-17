@@ -250,13 +250,35 @@ const Flow = () => {
         ];
 
         setNodes(initialNodes);
+
+        // 根据节点的 parentId 设置 edges 数组
         setEdges(
-          nodeList.map((node) => ({
-            id: `e${node.id}-${node.parentId || "0"}`,
-            source: node.parentId ? node.parentId.toString() : "0",
-            target: node.id.toString(),
-          }))
+          nodeList.flatMap((node) => {
+            const edges = [];
+        
+            if (node.parentId !== null) {
+              // 如果 parentId 不为 null，则根据逗号分隔的情况创建多条边
+              const parentIds = node.parentId.split(",");
+              parentIds.forEach((parentId) => {
+                edges.push({
+                  id: `e0-${node.id}`,
+                  source: parentId,
+                  target: node.id.toString(),
+                });
+              });
+            } else if (node.id !== "0") {
+              // 如果 parentId 为 null，且节点 id 不为 "0"（根节点），则创建一条从根节点到该节点的边
+              edges.push({
+                id: `e0-${node.id}`,
+                source: "0",
+                target: node.id.toString(),
+              });
+            }
+        
+            return edges;
+          })
         );
+
       } else {
         console.error("获取笔记详情失败");
       }
