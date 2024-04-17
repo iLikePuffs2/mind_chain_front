@@ -1,4 +1,3 @@
-/* 节点和线段排布的算法脚本，用于计算每个节点的新位置，返回值为带有位置信息的节点数组 */
 import { type Node, type Edge } from "reactflow";
 import { hierarchy, tree } from "d3-hierarchy";
 import { type HierarchyPointNode } from "d3-hierarchy";
@@ -51,10 +50,35 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
   const layoutedRoot = layout(hierarchyData);
 
   // 将布局后的节点转换为带有位置信息的节点数组
-  const layoutedNodes = layoutedRoot.descendants().map((node) => ({
-    ...node.data,
-    position: { x: node.x, y: node.y },
-  }));
+  // 顺便根据 level、status、blockedReason 修改颜色
+  const layoutedNodes = layoutedRoot.descendants().map((node) => {
+    const { level, status, blockedReason } = node.data.data;
+    let color;
+
+    if (level === 1) {
+      if (status === 1) {
+        color = "#99e699"; // 浅绿色
+      } else if (status === 2) {
+        color = "#fad1d1"; // 浅红色
+      }
+    } else if (level > 1) {
+      if (status === 1) {
+        color = "#b3d1ff"; // 浅蓝色
+      } else if (status === 2) {
+        if (blockedReason === 3 || blockedReason === 4) {
+          color = "#ff6666"; // 红色
+        } else {
+          color = "#fad1d1"; // 浅红色
+        }
+      }
+    }
+
+    return {
+      ...node.data,
+      position: { x: node.x, y: node.y },
+      style: { backgroundColor: color },
+    };
+  });
 
   return { nodes: layoutedNodes, edges };
 };
