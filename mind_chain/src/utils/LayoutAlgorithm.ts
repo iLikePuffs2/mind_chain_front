@@ -58,9 +58,16 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
     return {
       ...node.data,
       position: { x: node.x, y: node.y },
-      style: node.data.style ? { backgroundColor: node.data.style.backgroundColor } : {},
+      style: node.data.style
+        ? { backgroundColor: node.data.style.backgroundColor }
+        : {},
     };
   });
 
-  return { nodes: layoutedNodes, edges };
+  // 使用Map去重layoutedNodes
+  const uniqueLayoutedNodes = [
+    ...new Map(layoutedNodes.map((node) => [node.id, node])).values(),
+  ];
+
+  return { nodes: uniqueLayoutedNodes, edges };
 };

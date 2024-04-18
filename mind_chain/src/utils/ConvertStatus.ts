@@ -4,9 +4,9 @@ export const convertStatus = (nodes: Node[], edges: Edge[]) => {
   // 1.修改全部节点的parentId属性
   nodes.forEach((node) => {
     if (node.id !== "0") {
-      const parentEdge = edges.find((edge) => edge.target === node.id);
-      if (parentEdge) {
-        node.data.parentId = parentEdge.source;
+      const parentEdges = edges.filter((edge) => edge.target === node.id);
+      if (parentEdges.length > 0) {
+        node.data.parentId = parentEdges.map((edge) => edge.source).join(",");
       } else {
         node.data.parentId = "0";
       }
