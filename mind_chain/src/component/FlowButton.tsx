@@ -63,7 +63,7 @@ function FlowButton({
         noteId: 0, // noteId无所谓，因为保存的时候所有节点都会改
         name: "新节点",
         level: null, // 层级默认为null,表明它是游离节点
-        status: 1, // 状态默认为可执行
+        status: 1, // 状态默认为本身可执行
         blockedReason: 0, // 阻塞原因默认为未被阻塞
       },
       position: newNodePosition,
