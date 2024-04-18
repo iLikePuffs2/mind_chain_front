@@ -1,7 +1,7 @@
 import { type Node, type Edge } from "reactflow";
 import { hierarchy, tree } from "d3-hierarchy";
 import { type HierarchyPointNode } from "d3-hierarchy";
-import { getNodeColor } from "./nodeColorUtil";
+import { convertStatus } from "./ConvertStatus";
 
 const getPosition = (x: number, y: number) => ({ x, y });
 
@@ -50,18 +50,16 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
   // 执行布局算法
   const layoutedRoot = layout(hierarchyData);
 
-  // 将布局后的节点转换为带有位置信息的节点数组
-  // 顺便根据 level、status、blockedReason 修改颜色
+  // 修改节点的一系列状态
+  // 再将布局后的节点转换为带有位置信息的节点数组
   const layoutedNodes = layoutedRoot.descendants().map((node) => {
-    const { level, status, blockedReason } = node.data.data;
-    const color = getNodeColor(level, status, blockedReason);
-  
+    const color = convertStatus(node.data, nodes, edges);
+
     return {
       ...node.data,
       position: { x: node.x, y: node.y },
       style: { backgroundColor: color },
     };
   });
-
   return { nodes: layoutedNodes, edges };
 };
