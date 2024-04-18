@@ -17,6 +17,8 @@ import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
 
 const initialNodes = [];
 const initialEdges = [];
+// 保存状态转为'已完成'的节点数组
+const finishedNodes = [];
 
 const Flow = () => {
   const [nodes, setNodes] = useState(initialNodes);
@@ -96,7 +98,7 @@ const Flow = () => {
     setEdges((eds) =>
       eds.map((edge) => ({
         ...edge,
-        type: "custom",
+        type: "default",
       }))
     );
   }, []);

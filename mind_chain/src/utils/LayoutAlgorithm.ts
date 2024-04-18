@@ -1,6 +1,7 @@
 import { type Node, type Edge } from "reactflow";
 import { hierarchy, tree } from "d3-hierarchy";
 import { type HierarchyPointNode } from "d3-hierarchy";
+import { getNodeColor } from "./nodeColorUtil";
 
 const getPosition = (x: number, y: number) => ({ x, y });
 
@@ -53,26 +54,8 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
   // 顺便根据 level、status、blockedReason 修改颜色
   const layoutedNodes = layoutedRoot.descendants().map((node) => {
     const { level, status, blockedReason } = node.data.data;
-    let color;
-
-    if (level === 1) {
-      if (status === 1) {
-        color = "#99e699"; // 浅绿色
-      } else if (status === 2) {
-        color = "#fad1d1"; // 浅红色
-      }
-    } else if (level > 1) {
-      if (status === 1) {
-        color = "#b3d1ff"; // 浅蓝色
-      } else if (status === 2) {
-        if (blockedReason === 3 || blockedReason === 4) {
-          color = "#ff6666"; // 红色
-        } else {
-          color = "#fad1d1"; // 浅红色
-        }
-      }
-    }
-
+    const color = getNodeColor(level, status, blockedReason);
+  
     return {
       ...node.data,
       position: { x: node.x, y: node.y },

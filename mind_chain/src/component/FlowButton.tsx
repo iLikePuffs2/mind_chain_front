@@ -54,17 +54,17 @@ function FlowButton({
       }
     } while (overlappingNode);
 
-    // 设置节点属性
+    // 设置'游离节点'属性
     const newNode = {
       id: newNodeId,
       data: {
         label: "新节点",
         id: maxId + 1,
-        noteId: 0,
+        noteId: 0, // noteId无所谓，因为保存的时候所有节点都会改
         name: "新节点",
-        level: 3,
-        status: 1,
-        blockedReason: 0,
+        level: null, // 层级默认为null,表明它是游离节点
+        status: 1, // 状态默认为可执行
+        blockedReason: 0, // 阻塞原因默认为未被阻塞
       },
       position: newNodePosition,
     };
