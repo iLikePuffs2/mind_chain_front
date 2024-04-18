@@ -51,15 +51,16 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
   const layoutedRoot = layout(hierarchyData);
 
   // 修改节点的一系列状态
-  // 再将布局后的节点转换为带有位置信息的节点数组
-  const layoutedNodes = layoutedRoot.descendants().map((node) => {
-    const color = convertStatus(node.data, nodes, edges);
+  convertStatus(nodes, edges);
 
+  // 将布局后的节点转换为带有位置信息的节点数组
+  const layoutedNodes = layoutedRoot.descendants().map((node) => {
     return {
       ...node.data,
       position: { x: node.x, y: node.y },
-      style: { backgroundColor: color },
+      style: node.data.style ? { backgroundColor: node.data.style.backgroundColor } : {},
     };
   });
+
   return { nodes: layoutedNodes, edges };
 };
