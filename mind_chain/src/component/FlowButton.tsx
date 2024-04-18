@@ -28,13 +28,13 @@ function FlowButton({
 
   // 新增节点
   const addNode = () => {
-    // 找到当前节点中 id 最大的值
+    // 新节点id比当前 nodes 中 id 最大的还大1
     const maxId = nodes.reduce((max, node) => {
       const nodeId = parseInt(node.id, 10);
       return nodeId > max ? nodeId : max;
     }, 0);
-
     const newNodeId = `${maxId + 1}`;
+    
     let newNodePosition = {
       x: rootNode.position.x + 200,
       y: rootNode.position.y,
