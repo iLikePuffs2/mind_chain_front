@@ -1,5 +1,5 @@
 import React from "react";
-import { Handle, Position, NodeToolbar} from "reactflow";
+import { Handle, Position, NodeToolbar } from "reactflow";
 import {
   PlusCircleOutlined,
   UsergroupAddOutlined,
@@ -12,19 +12,34 @@ import {
   RightOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Menu, Space } from "antd";
+import { addSiblingNode, addChildNode } from "../utils/AddNode";
 
-const CustomNode = ({ data, isConnectable, selected }) => {
+const CustomNode = ({
+  data,
+  isConnectable,
+  nodes,
+  setNodes,
+  edges,
+  setEdges,
+  selected,
+}) => {
   const { label, isRoot } = data;
 
   const plusMenu = (
     <Menu>
-      <Menu.Item key="1">
+      <Menu.Item
+        key="1"
+        onClick={() => addSiblingNode(data, nodes, setNodes, edges, setEdges)}
+      >
         <Space>
           <UsergroupAddOutlined />
           <span>新增同级节点</span>
         </Space>
       </Menu.Item>
-      <Menu.Item key="2">
+      <Menu.Item
+        key="2"
+        onClick={() => addChildNode(data, nodes, setNodes, edges, setEdges)}
+      >
         <Space>
           <UserAddOutlined />
           <span>新增子节点</span>
@@ -52,18 +67,23 @@ const CustomNode = ({ data, isConnectable, selected }) => {
 
   return (
     <div className="react-flow__node-group">
-      <NodeToolbar
-        isVisible={selected}
-        position={Position.Right}
-      >
+      <NodeToolbar isVisible={selected} position={Position.Right}>
         <Space size="middle">
-          <Dropdown overlay={plusMenu} placement="topCenter" trigger={["click"]}>
+          <Dropdown
+            overlay={plusMenu}
+            placement="topCenter"
+            trigger={["click"]}
+          >
             <PlusCircleOutlined style={{ fontSize: 20 }} />
           </Dropdown>
           {!isRoot && (
             <>
               <CheckCircleOutlined style={{ fontSize: 20 }} />
-              <Dropdown overlay={stopMenu} placement="topCenter" trigger={["click"]}>
+              <Dropdown
+                overlay={stopMenu}
+                placement="topCenter"
+                trigger={["click"]}
+              >
                 <StopOutlined style={{ fontSize: 20 }} />
               </Dropdown>
               <ClockCircleOutlined style={{ fontSize: 20 }} />

@@ -16,8 +16,6 @@ import { Note } from "../model/note";
 import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
 import CustomNode from '../component/CustomNode';
 
-const nodeTypes = { customNode: CustomNode };
-
 const initialNodes = [];
 const initialEdges = [];
 // 保存状态转为'已完成'的节点数组
@@ -33,6 +31,18 @@ const Flow = () => {
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [renameNoteName, setRenameNoteName] = useState("");
   const [selectedNoteName, setSelectedNoteName] = useState("");
+
+  const nodeTypes = { 
+    customNode: (props) => (
+      <CustomNode 
+        {...props} 
+        nodes={nodes}
+        setNodes={setNodes}
+        edges={edges}      
+        setEdges={setEdges}
+      />
+    ),
+  };
 
   // 根节点的初始值
   const [rootNode, setRootNode] = useState({
