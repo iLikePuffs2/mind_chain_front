@@ -20,14 +20,16 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
     .querySelector(`[data-id="${nodes[0].id}"]`)
     .getBoundingClientRect();
 
-  // 找到 nodes 数组里 type 为 'input' 的根节点
-  const originalRootNode = nodes.find((node) => node.type === "input");
+  // 找到 nodes 数组里 id 为 '0' 的根节点
+  const originalRootNode = nodes.find((node) => node.id === "0");
 
   // 创建一个type为'input'的根节点
   const rootNode: Node = {
     id: "0",
-    type: "input",
-    data: originalRootNode ? originalRootNode.data : { label: "Root" },
+    type: "customNode",
+    data: originalRootNode
+      ? originalRootNode.data
+      : { label: note ? note.name : "未命名笔记", isRoot: true },
     position: { x: 0, y: 0 },
   };
 
