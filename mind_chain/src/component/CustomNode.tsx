@@ -6,7 +6,7 @@ const CustomNode = ({ data, isConnectable, selected }) => {
   const { transform } = useReactFlow();
 
   return (
-    <div className="react-flow__node-default selectable">
+    <div className="react-flow__node-group">
       <NodeToolbar isVisible={selected} position={Position.Right} transform={transform}>
         <button>按钮1</button>
         <button>按钮2</button>

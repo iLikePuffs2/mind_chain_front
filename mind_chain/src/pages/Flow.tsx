@@ -38,7 +38,7 @@ const Flow = () => {
   const [rootNode, setRootNode] = useState({
     id: '0',
     type: 'customNode',
-    data: { label: '未命名笔记', isRoot: true },
+    data: { label: '未命名笔记', isRoot: true},
     position: { x: 0, y: 0 },
   });
 
@@ -251,6 +251,7 @@ const Flow = () => {
             id: node.id.toString(),
             data: { label: node.name, ...node },
             position: { x: 0, y: 0 },
+            type: 'customNode',
           })),
         ];
 
