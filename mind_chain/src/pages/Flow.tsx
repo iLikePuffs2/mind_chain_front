@@ -15,7 +15,6 @@ import "../css/Flow.css";
 import { Note } from "../model/note";
 import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
 import CustomNode from '../component/CustomNode';
-import { addSiblingNode, addChildNode } from "../utils/AddNode";
 
 const nodeTypes = { customNode: CustomNode };
 
@@ -316,8 +315,6 @@ const Flow = () => {
             onConnect={onConnect}
             onLayout={onLayout}
             nodeTypes={nodeTypes}
-            addSiblingNode={addSiblingNode}
-            addChildNode={addChildNode}
           />
         </div>
       </ReactFlowProvider>

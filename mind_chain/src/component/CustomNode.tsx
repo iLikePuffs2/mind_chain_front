@@ -1,5 +1,5 @@
 import React from "react";
-import { Handle, Position, NodeToolbar, useReactFlow } from "reactflow";
+import { Handle, Position, NodeToolbar} from "reactflow";
 import {
   PlusCircleOutlined,
   UsergroupAddOutlined,
@@ -12,21 +12,19 @@ import {
   RightOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Menu, Space } from "antd";
-import { addSiblingNode, addChildNode } from "../utils/AddNode";
 
 const CustomNode = ({ data, isConnectable, selected }) => {
   const { label, isRoot } = data;
-  const { transform, getNode, getEdges, setEdges, setNodes } = useReactFlow();
 
   const plusMenu = (
     <Menu>
-      <Menu.Item key="1" onClick={() => addSiblingNode(getNode(data.id), setNodes, getEdges(), setEdges)}>
+      <Menu.Item key="1">
         <Space>
           <UsergroupAddOutlined />
           <span>新增同级节点</span>
         </Space>
       </Menu.Item>
-      <Menu.Item key="2" onClick={() => addChildNode(getNode(data.id), setNodes, getEdges(), setEdges)}>
+      <Menu.Item key="2">
         <Space>
           <UserAddOutlined />
           <span>新增子节点</span>
@@ -57,7 +55,6 @@ const CustomNode = ({ data, isConnectable, selected }) => {
       <NodeToolbar
         isVisible={selected}
         position={Position.Right}
-        transform={transform}
       >
         <Space size="middle">
           <Dropdown overlay={plusMenu} placement="topCenter" trigger={["click"]}>
