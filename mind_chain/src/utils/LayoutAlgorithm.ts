@@ -20,7 +20,7 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
     .querySelector(`[data-id="${nodes[0].id}"]`)
     .getBoundingClientRect();
 
-  // 找到 nods数组里 type 为 'input' 的根节点
+  // 找到 nodes 数组里 type 为 'input' 的根节点
   const originalRootNode = nodes.find((node) => node.type === "input");
 
   // 创建一个type为'input'的根节点
@@ -47,7 +47,7 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
   // 设置布局的节点尺寸
   layout.nodeSize([width * 2, height * 2]);
 
-  // 执行布局算法
+  // 执行布局算法(计算节点的位置，不计算边的)
   const layoutedRoot = layout(hierarchyData);
 
   // 修改节点的一系列状态

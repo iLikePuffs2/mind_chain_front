@@ -1,6 +1,6 @@
 // FlowButton.tsx
 import React from "react";
-import ReactFlow, { Controls, Background, Panel } from "reactflow";
+import ReactFlow, { Controls, Background, Panel, Position } from "reactflow";
 import "reactflow/dist/style.css";
 import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
 import useCopyPaste from "../utils/useCopyPaste";
@@ -15,6 +15,7 @@ function FlowButton({
   onEdgesChange,
   onConnect,
   onLayout,
+  nodeTypes,
 }) {
   const { cut, copy, paste, bufferedNodes } = useCopyPaste();
   const canCopy = nodes.some(({ selected }) => selected);
@@ -57,6 +58,7 @@ function FlowButton({
     // 设置'游离节点'属性
     const newNode = {
       id: newNodeId,
+      type: 'customNode',
       data: {
         label: "新节点",
         id: maxId + 1,
@@ -80,6 +82,7 @@ function FlowButton({
         edges={edges}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        nodeTypes={nodeTypes}
         fitView
       >
         <Background />

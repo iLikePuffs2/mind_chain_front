@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, memo } from "react";
 import { message } from "antd";
 import { RightCircleTwoTone } from "@ant-design/icons";
 import axios from "axios";
@@ -14,6 +14,9 @@ import AddNotePop from "../component/AddNotePop";
 import "../css/Flow.css";
 import { Note } from "../model/note";
 import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
+import CustomNode from '../component/CustomNode';
+
+const nodeTypes = { customNode: CustomNode };
 
 const initialNodes = [];
 const initialEdges = [];
@@ -33,10 +36,10 @@ const Flow = () => {
 
   // 根节点的初始值
   const [rootNode, setRootNode] = useState({
-    id: "0",
-    data: { label: "未命名笔记" },
+    id: '0',
+    type: 'customNode',
+    data: { label: '未命名笔记', isRoot: true },
     position: { x: 0, y: 0 },
-    type: "input",
   });
 
   const onNodesChange = useCallback(
@@ -240,9 +243,9 @@ const Flow = () => {
           // 根节点
           {
             id: "0",
-            data: { label: note ? note.name : "未命名笔记" },
+            data: { label: note ? note.name : "未命名笔记", isRoot: true },
             position: { x: 0, y: 0 },
-            type: "input",
+            type: 'customNode',
           },
           ...nodeList.map((node) => ({
             id: node.id.toString(),
@@ -311,6 +314,7 @@ const Flow = () => {
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onLayout={onLayout}
+            nodeTypes={nodeTypes}
           />
         </div>
       </ReactFlowProvider>
