@@ -15,6 +15,7 @@ import "../css/Flow.css";
 import { Note } from "../model/note";
 import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
 import CustomNode from '../component/CustomNode';
+import { addSiblingNode, addChildNode } from "../utils/AddNode";
 
 const nodeTypes = { customNode: CustomNode };
 
@@ -310,12 +311,13 @@ const Flow = () => {
             setNodes={setNodes}
             edges={edges}
             setEdges={setEdges}
-            rootNode={rootNode}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onLayout={onLayout}
             nodeTypes={nodeTypes}
+            addSiblingNode={addSiblingNode}
+            addChildNode={addChildNode}
           />
         </div>
       </ReactFlowProvider>

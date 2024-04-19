@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Login from "./pages/Login.tsx";
 import { ConfigProvider } from "antd";
 import zhCN from "antd/es/locale/zh_CN";
 import MyRouter from "./router/MyRouter.tsx";
