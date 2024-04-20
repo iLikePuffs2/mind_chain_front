@@ -6,12 +6,15 @@ export const removeEdges = (sourceNodeId, targetNodeId, edges) =>
 
 // 获取某个节点的所有直接子节点
 export const findDirectChildNodes = (nodeId, nodes, edges) => {
-  const currentNode = nodes.find((node) => node.id === nodeId);
+  const currentNode = nodes.find((node) => node.id === String(nodeId));
+  if (!currentNode) {
+    return []; // 如果找不到当前节点，返回空数组
+  }
   return edges
-    .filter((edge) => edge.source === nodeId)
+    .filter((edge) => edge.source === String(nodeId))
     .map((edge) => nodes.find((node) => node.id === edge.target))
     .filter(
-      (childNode) => childNode && childNode.data.level === currentNode.level + 1
+      (childNode) => childNode && childNode.data.level === currentNode.data.level + 1
     );
 };
 
@@ -21,12 +24,15 @@ export const findLeafNodes = (nodeId, nodes, edges) => {
   const leafNodes = [];
 
   const dfs = (currentNodeId) => {
+    const currentNode = nodes.find((node) => node.id === currentNodeId);
+    if (!currentNode) {
+      return; // 如果找不到当前节点，直接返回
+    }
     const childNodes = findDirectChildNodes(currentNodeId, nodes, edges);
     if (childNodes.length === 0) {
-      const leafNode = nodes.find((node) => node.id === String(currentNodeId));
-      if (!visited.has(leafNode.id)) {
-        leafNodes.push(leafNode);
-        visited.add(leafNode.id);
+      if (!visited.has(currentNode.id)) {
+        leafNodes.push(currentNode);
+        visited.add(currentNode.id);
       }
     } else {
       childNodes.forEach((childNode) => dfs(childNode.id));
@@ -87,6 +93,43 @@ export const addSiblingNode = (
 
   const convergenceNode = findConvergenceNode(currentNode, nodes, edges);
 
+  let newNodePosition = { x: 0, y: 0 };
+
+  const currentNodeObj = nodes.find((node) => node.data.id === currentNode.id);
+  if (currentNodeObj) {
+    const leafNodes = findLeafNodes(currentNode.id, nodes, edges);
+    if (leafNodes.length > 0) {
+      const lastLeafNode = nodes.find(
+        (node) => node.data.id === leafNodes[leafNodes.length - 1].id
+      );
+      if (lastLeafNode) {
+        newNodePosition = {
+          x: lastLeafNode.position.x,
+          y: lastLeafNode.position.y + 110,
+        };
+      }
+    } else {
+      newNodePosition = {
+        x: currentNodeObj.position.x,
+        y: currentNodeObj.position.y + 120,
+      };
+    }
+  }
+
+  // 循环判断是否有重合节点,直到没有重合节点为止
+  let overlappingNode;
+  do {
+    overlappingNode = nodes.find(
+      (node) =>
+        node.position.x === newNodePosition.x &&
+        node.position.y === newNodePosition.y
+    );
+    if (overlappingNode) {
+      // 如果有重合节点,就右移一些
+      newNodePosition.x += 50;
+    }
+  } while (overlappingNode);
+
   const newNode = {
     id: newNodeId,
     type: "customNode",
@@ -103,16 +146,18 @@ export const addSiblingNode = (
       status: 1,
       blockedReason: "0",
     },
-    position: { x: 0, y: 0 },
+    position: newNodePosition,
   };
 
-  setNodes((nds) => nds.concat(newNode));
+  setNodes([...nodes, newNode]);
 
+  // 连接边的逻辑
   if (convergenceNode) {
     const edgesToConvergenceNode = edges.filter(
       (edge) => edge.target === convergenceNode.id
     );
     const newEdgesToConvergenceNode = edgesToConvergenceNode.map((edge) => ({
+      id: `${edge.source}-${newNodeId}`,
       source: edge.source,
       target: newNodeId,
     }));
@@ -127,8 +172,16 @@ export const addSiblingNode = (
         })
     );
   } else {
-    const childNodes = findDirectChildNodes(currentNode.id, nodes, edges);
-    if (childNodes.length === 1) {
+    const directChildNodes = findDirectChildNodes(currentNode.id, nodes, edges);
+    if (directChildNodes.length === 0) {
+      setEdges((eds) =>
+        eds.concat({
+          id: `${currentNode.id}-${newNodeId}`,
+          source: currentNode.id.toString(),
+          target: newNodeId.toString(),
+        })
+      );
+    } else if (directChildNodes.length === 1) {
       const targetNode = nodes.find(
         (node) =>
           node.id ===
@@ -150,13 +203,13 @@ export const addSiblingNode = (
           )
         );
       } else {
-        setEdges((eds) =>
-          eds.concat({
-            id: `${currentNode.id}-${newNodeId}`,
-            source: currentNode.id.toString(),
-            target: newNodeId.toString(),
-          })
-        );
+        const leafNodes = findLeafNodes(currentNode.id, nodes, edges);
+        const newEdgesToSiblingNode = leafNodes.map((leafNode) => ({
+          id: `${leafNode.id}-${newNodeId}`,
+          source: leafNode.id,
+          target: newNodeId,
+        }));
+        setEdges((eds) => eds.concat(newEdgesToSiblingNode));
       }
     } else {
       const leafNodes = findLeafNodes(currentNode.id, nodes, edges);
@@ -178,6 +231,30 @@ export const addChildNode = (currentNode, nodes, setNodes, edges, setEdges) => {
   const convergenceNode = findConvergenceNode(currentNode, nodes, edges);
   const directChildNodes = findDirectChildNodes(currentNode.id, nodes, edges);
 
+  let newNodePosition = { x: 0, y: 0 };
+
+  const currentNodeObj = nodes.find((node) => node.data.id === currentNode.id);
+  if (currentNodeObj) {
+    newNodePosition = {
+      x: currentNodeObj.position.x,
+      y: currentNodeObj.position.y + 100,
+    };
+  }
+
+  // 循环判断是否有重合节点,直到没有重合节点为止
+  let overlappingNode;
+  do {
+    overlappingNode = nodes.find(
+      (node) =>
+        node.position.x === newNodePosition.x &&
+        node.position.y === newNodePosition.y
+    );
+    if (overlappingNode) {
+      // 如果有重合节点,就右移一些
+      newNodePosition.x += 50;
+    }
+  } while (overlappingNode);
+
   const newNode = {
     id: newNodeId,
     type: "customNode",
@@ -194,7 +271,7 @@ export const addChildNode = (currentNode, nodes, setNodes, edges, setEdges) => {
       status: 1,
       blockedReason: "0",
     },
-    position: { x: 0, y: 0 },
+    position: newNodePosition,
   };
 
   setNodes([...nodes, newNode]);
