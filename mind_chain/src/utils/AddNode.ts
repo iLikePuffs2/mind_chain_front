@@ -94,7 +94,7 @@ export const findConvergenceNode = (currentNode, nodes, edges) => {
     (node) => String(node.data.id) === String(currentNode.id)
   );
 
-  // 判断是否有且仅有一条以当前节点为source的线段，且target对应的节点的level和当前节点相同
+  // 判断是否有且仅有一条以当前节点为source的线段，且target对应的节点的level<=当前节点的level
   const edgesFromCurrentNode = edges.filter(
     (edge) => edge.source === currentNodeObj.id
   );
@@ -102,7 +102,7 @@ export const findConvergenceNode = (currentNode, nodes, edges) => {
     const targetNode = nodes.find(
       (node) => node.id === edgesFromCurrentNode[0].target
     );
-    if (targetNode && targetNode.data.level === currentNodeObj.data.level) {
+    if (targetNode && targetNode.data.level <= currentNodeObj.data.level) {
       convergenceNode = targetNode;
       return convergenceNode;
     }
@@ -119,7 +119,7 @@ export const findConvergenceNode = (currentNode, nodes, edges) => {
 
       if (!visited.has(childNodeId)) {
         if (
-          childNode.data.level === currentNodeObj.data.level &&
+          childNode.data.level <= currentNodeObj.data.level &&
           childNodeId !== currentNodeObj.id
         ) {
           convergenceNode = childNode;
@@ -217,17 +217,33 @@ export const addSiblingNode = (
   // 连接边的逻辑(新增同级节点)
   if (convergenceNode) {
     // 5.有收敛节点
-    const edgesToConvergenceNode = edges.filter(
-      (edge) => edge.target === convergenceNode.id
-    );
+    const edgesToConvergenceNode = [];
+
+    const dfs = (nodeId) => {
+      const childEdges = edges.filter((edge) => edge.source === String(nodeId));
+
+      for (const childEdge of childEdges) {
+        const childNodeId = childEdge.target;
+
+        if (childNodeId === String(convergenceNode.id)) {
+          edgesToConvergenceNode.push(childEdge);
+        } else {
+          dfs(childNodeId);
+        }
+      }
+    };
+
+    dfs(currentNode.id);
+
     const newEdgesToConvergenceNode = edgesToConvergenceNode.map((edge) => ({
       id: `${edge.source}-${newNodeId}`,
       source: edge.source,
       target: newNodeId,
     }));
+
     setEdges((eds) =>
       eds
-        .filter((edge) => edge.target !== convergenceNode.id)
+        .filter((edge) => !edgesToConvergenceNode.includes(edge))
         .concat(newEdgesToConvergenceNode)
         .concat({
           id: `${newNodeId}-${convergenceNode.id}`,
