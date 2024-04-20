@@ -14,7 +14,7 @@ import AddNotePop from "../component/AddNotePop";
 import "../css/Flow.css";
 import { Note } from "../model/note";
 import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
-import CustomNode from '../component/CustomNode';
+import CustomNode from "../component/CustomNode";
 
 const initialNodes = [];
 const initialEdges = [];
@@ -32,13 +32,13 @@ const Flow = () => {
   const [renameNoteName, setRenameNoteName] = useState("");
   const [selectedNoteName, setSelectedNoteName] = useState("");
 
-  const nodeTypes = { 
+  const nodeTypes = {
     customNode: (props) => (
-      <CustomNode 
-        {...props} 
+      <CustomNode
+        {...props}
         nodes={nodes}
         setNodes={setNodes}
-        edges={edges}      
+        edges={edges}
         setEdges={setEdges}
       />
     ),
@@ -46,9 +46,14 @@ const Flow = () => {
 
   // 根节点的初始值
   const [rootNode, setRootNode] = useState({
-    id: '0',
-    type: 'customNode',
-    data: { label: '未命名笔记', isRoot: true},
+    id: "0",
+    type: "customNode",
+    data: { 
+      label: "未命名笔记", 
+      isRoot: true, 
+      id: 0,
+      level: 0
+    },
     position: { x: 0, y: 0 },
   });
 
@@ -253,15 +258,20 @@ const Flow = () => {
           // 根节点
           {
             id: "0",
-            data: { label: note ? note.name : "未命名笔记", isRoot: true },
+            data: { 
+              label: note ? note.name : "未命名笔记", 
+              isRoot: true, 
+              id: 0,
+              level: 0
+            },
             position: { x: 0, y: 0 },
-            type: 'customNode',
+            type: "customNode",
           },
           ...nodeList.map((node) => ({
             id: node.id.toString(),
             data: { label: node.name, ...node },
             position: { x: 0, y: 0 },
-            type: 'customNode',
+            type: "customNode",
           })),
         ];
 
@@ -271,7 +281,7 @@ const Flow = () => {
         setEdges(
           nodeList.flatMap((node) => {
             const edges = [];
-        
+
             if (node.parentId !== null) {
               // 如果 parentId 不为 null，则根据逗号分隔的情况创建多条边
               const parentIds = node.parentId.split(",");
@@ -290,11 +300,10 @@ const Flow = () => {
                 target: node.id.toString(),
               });
             }
-        
+
             return edges;
           })
         );
-
       } else {
         console.error("获取笔记详情失败");
       }

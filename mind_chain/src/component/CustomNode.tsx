@@ -27,15 +27,17 @@ const CustomNode = ({
 
   const plusMenu = (
     <Menu>
-      <Menu.Item
-        key="1"
-        onClick={() => addSiblingNode(data, nodes, setNodes, edges, setEdges)}
-      >
-        <Space>
-          <UsergroupAddOutlined />
-          <span>新增同级节点</span>
-        </Space>
-      </Menu.Item>
+      {!isRoot && (
+        <Menu.Item
+          key="1"
+          onClick={() => addSiblingNode(data, nodes, setNodes, edges, setEdges)}
+        >
+          <Space>
+            <UsergroupAddOutlined />
+            <span>新增同级节点</span>
+          </Space>
+        </Menu.Item>
+      )}
       <Menu.Item
         key="2"
         onClick={() => addChildNode(data, nodes, setNodes, edges, setEdges)}
