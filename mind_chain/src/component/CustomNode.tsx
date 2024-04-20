@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Handle, Position, NodeToolbar } from "reactflow";
 import {
   PlusCircleOutlined,
@@ -13,17 +13,11 @@ import {
 } from "@ant-design/icons";
 import { Dropdown, Menu, Space } from "antd";
 import { addSiblingNode, addChildNode } from "../utils/AddNode";
+import { NodesEdgesContext } from "../pages/Flow";
 
-const CustomNode = ({
-  data,
-  isConnectable,
-  nodes,
-  setNodes,
-  edges,
-  setEdges,
-  selected,
-}) => {
+const CustomNode = ({ data, isConnectable, selected }) => {
   const { label, isRoot } = data;
+  const { nodes, setNodes, edges, setEdges } = useContext(NodesEdgesContext);
 
   const plusMenu = (
     <Menu>
@@ -71,21 +65,13 @@ const CustomNode = ({
     <div className="react-flow__node-group">
       <NodeToolbar isVisible={selected} position={Position.Right}>
         <Space size="middle">
-          <Dropdown
-            overlay={plusMenu}
-            placement="topCenter"
-            trigger={["click"]}
-          >
+          <Dropdown overlay={plusMenu} placement="topCenter" trigger={["click"]}>
             <PlusCircleOutlined style={{ fontSize: 20 }} />
           </Dropdown>
           {!isRoot && (
             <>
               <CheckCircleOutlined style={{ fontSize: 20 }} />
-              <Dropdown
-                overlay={stopMenu}
-                placement="topCenter"
-                trigger={["click"]}
-              >
+              <Dropdown overlay={stopMenu} placement="topCenter" trigger={["click"]}>
                 <StopOutlined style={{ fontSize: 20 }} />
               </Dropdown>
               <ClockCircleOutlined style={{ fontSize: 20 }} />
@@ -101,11 +87,7 @@ const CustomNode = ({
         </Space>
       </NodeToolbar>
       {!isRoot && (
-        <Handle
-          type="target"
-          position={Position.Top}
-          isConnectable={isConnectable}
-        />
+        <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
       )}
       <div>{label}</div>
       <Handle

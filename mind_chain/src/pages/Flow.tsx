@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, memo } from "react";
+import React, { useCallback, useState, useEffect, useContext } from "react";
 import { message } from "antd";
 import { RightCircleTwoTone } from "@ant-design/icons";
 import axios from "axios";
@@ -15,11 +15,23 @@ import "../css/Flow.css";
 import { Note } from "../model/note";
 import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
 import CustomNode from "../component/CustomNode";
+import { createContext } from 'react';
 
 const initialNodes = [];
 const initialEdges = [];
 // 保存状态转为'已完成'的节点数组
 const finishedNodes = [];
+
+export const NodesEdgesContext = createContext({
+  nodes: [],
+  setNodes: () => {},
+  edges: [],
+  setEdges: () => {},
+});
+
+const nodeTypes = {
+  customNode: (props) => <CustomNode {...props} />,
+};
 
 const Flow = () => {
   const [nodes, setNodes] = useState(initialNodes);
@@ -31,18 +43,6 @@ const Flow = () => {
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [renameNoteName, setRenameNoteName] = useState("");
   const [selectedNoteName, setSelectedNoteName] = useState("");
-
-  const nodeTypes = {
-    customNode: (props) => (
-      <CustomNode
-        {...props}
-        nodes={nodes}
-        setNodes={setNodes}
-        edges={edges}
-        setEdges={setEdges}
-      />
-    ),
-  };
 
   // 根节点的初始值
   const [rootNode, setRootNode] = useState({
@@ -319,59 +319,61 @@ const Flow = () => {
   };
 
   return (
-    <div className="app-container">
-      <ReactFlowProvider>
-        <div className="icon-container" onClick={showDrawer}>
-          <RightCircleTwoTone style={{ fontSize: "30px" }} />
+    <NodesEdgesContext.Provider value={{ nodes, setNodes, edges, setEdges }}>
+      <div className="app-container">
+        <ReactFlowProvider>
+          <div className="icon-container" onClick={showDrawer}>
+            <RightCircleTwoTone style={{ fontSize: "30px" }} />
+          </div>
+          <div className="flow-container">
+            <FlowButton
+              nodes={nodes}
+              setNodes={setNodes}
+              edges={edges}
+              setEdges={setEdges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onLayout={onLayout}
+              nodeTypes={nodeTypes}
+            />
+          </div>
+        </ReactFlowProvider>
+        <div className="text-container">
+          <div className="button-container">
+            <button>当前任务列表</button>
+            <button>阻塞任务列表</button>
+            <button>任务上下文</button>
+          </div>
+          <textarea className="text-input" />
         </div>
-        <div className="flow-container">
-          <FlowButton
-            nodes={nodes}
-            setNodes={setNodes}
-            edges={edges}
-            setEdges={setEdges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onLayout={onLayout}
-            nodeTypes={nodeTypes}
-          />
-        </div>
-      </ReactFlowProvider>
-      <div className="text-container">
-        <div className="button-container">
-          <button>当前任务列表</button>
-          <button>阻塞任务列表</button>
-          <button>任务上下文</button>
-        </div>
-        <textarea className="text-input" />
+        <SidebarDrawer
+          open={open}
+          onClose={onClose}
+          notes={notes}
+          onNoteClick={handleNoteClick}
+          onRenameClick={(name) => handleRename(name)}
+          onDeleteClick={(name) => deleteNote(name)}
+          onAddNoteClick={() => setModalVisible(true)}
+        />
+        <AddNotePop
+          visible={modalVisible}
+          title="新增笔记"
+          onOk={addNote}
+          onCancel={() => setModalVisible(false)}
+          value={newNoteName}
+          onChange={(e) => setNewNoteName(e.target.value)}
+        />
+        <AddNotePop
+          visible={renameModalVisible}
+          title="重命名笔记"
+          onOk={handleConfirmRename}
+          onCancel={() => setRenameModalVisible(false)}
+          value={renameNoteName}
+          onChange={(e) => setRenameNoteName(e.target.value)}
+        />
       </div>
-      <SidebarDrawer
-        open={open}
-        onClose={onClose}
-        notes={notes}
-        onNoteClick={handleNoteClick}
-        onRenameClick={(name) => handleRename(name)}
-        onDeleteClick={(name) => deleteNote(name)}
-        onAddNoteClick={() => setModalVisible(true)}
-      />
-      <AddNotePop
-        visible={modalVisible}
-        title="新增笔记"
-        onOk={addNote}
-        onCancel={() => setModalVisible(false)}
-        value={newNoteName}
-        onChange={(e) => setNewNoteName(e.target.value)}
-      />
-      <AddNotePop
-        visible={renameModalVisible}
-        title="重命名笔记"
-        onOk={handleConfirmRename}
-        onCancel={() => setRenameModalVisible(false)}
-        value={renameNoteName}
-        onChange={(e) => setRenameNoteName(e.target.value)}
-      />
-    </div>
+    </NodesEdgesContext.Provider>
   );
 };
 
