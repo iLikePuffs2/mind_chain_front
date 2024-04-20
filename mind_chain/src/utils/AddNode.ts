@@ -1,7 +1,11 @@
 // 移除从 sourceNode 到 targetNode 的所有边
 export const removeEdges = (sourceNodeId, targetNodeId, edges) =>
   edges.filter(
-    (edge) => !(edge.source === sourceNodeId && edge.target === targetNodeId)
+    (edge) =>
+      !(
+        edge.source === String(sourceNodeId) &&
+        edge.target === String(targetNodeId)
+      )
   );
 
 // 获取某个节点的所有直接子节点
@@ -14,7 +18,8 @@ export const findDirectChildNodes = (nodeId, nodes, edges) => {
     .filter((edge) => edge.source === String(nodeId))
     .map((edge) => nodes.find((node) => node.id === edge.target))
     .filter(
-      (childNode) => childNode && childNode.data.level === currentNode.data.level + 1
+      (childNode) =>
+        childNode && childNode.data.level === currentNode.data.level + 1
     );
 };
 
@@ -55,20 +60,40 @@ export const findConvergenceNode = (currentNode, nodes, edges) => {
   const visited = new Set();
   let convergenceNode = null;
 
+  const currentNodeObj = nodes.find((node) => node.data.id === currentNode.id);
+
+  // 判断是否有且仅有一条以当前节点为source的线段，且target对应的节点的level和当前节点相同
+  const edgesFromCurrentNode = edges.filter(
+    (edge) => edge.source === currentNodeObj.id
+  );
+  if (edgesFromCurrentNode.length === 1) {
+    const targetNode = nodes.find(
+      (node) => node.id === edgesFromCurrentNode[0].target
+    );
+    if (targetNode && targetNode.data.level === currentNodeObj.data.level) {
+      convergenceNode = targetNode;
+      return convergenceNode;
+    }
+  }
+
   const dfs = (nodeId) => {
     visited.add(nodeId);
 
-    const childNodes = findDirectChildNodes(nodeId, nodes, edges);
-    for (const childNode of childNodes) {
-      if (!visited.has(childNode.id)) {
+    const childEdges = edges.filter((edge) => edge.source === nodeId);
+
+    for (const childEdge of childEdges) {
+      const childNodeId = childEdge.target;
+      const childNode = nodes.find((node) => node.id === childNodeId);
+
+      if (!visited.has(childNodeId)) {
         if (
-          childNode.data.level === currentNode.level &&
-          childNode.id !== currentNode.id
+          childNode.data.level === currentNodeObj.data.level &&
+          childNodeId !== currentNodeObj.id
         ) {
           convergenceNode = childNode;
           return;
         }
-        dfs(childNode.id);
+        dfs(childNodeId);
         if (convergenceNode) {
           return;
         }
@@ -76,7 +101,7 @@ export const findConvergenceNode = (currentNode, nodes, edges) => {
     }
   };
 
-  dfs(currentNode.id);
+  dfs(currentNodeObj.id);
   return convergenceNode;
 };
 
@@ -276,7 +301,9 @@ export const addChildNode = (currentNode, nodes, setNodes, edges, setEdges) => {
 
   setNodes([...nodes, newNode]);
 
+  // 分情况处理的逻辑
   if (convergenceNode) {
+    // 1.有收敛节点,路径之间无其他节点
     if (directChildNodes.length === 0) {
       setEdges((eds) =>
         removeEdges(currentNode.id, convergenceNode.id, eds).concat(
@@ -292,6 +319,7 @@ export const addChildNode = (currentNode, nodes, setNodes, edges, setEdges) => {
           }
         )
       );
+      // 2.有收敛节点,路径之间有其他节点
     } else {
       setEdges((eds) =>
         eds.concat(
@@ -309,14 +337,16 @@ export const addChildNode = (currentNode, nodes, setNodes, edges, setEdges) => {
       );
     }
   } else {
-    const childNodes = findDirectChildNodes(currentNode.id, nodes, edges);
-    if (childNodes.length === 1) {
+    // 3.无收敛节点,以当前节点为起点的线段数量=1，且这条线段的目标节点的level比当前节点更小
+    // 先判断是否有且仅有一条以当前节点为source的线段，且target对应的节点的level比当前节点更小
+    const edgesFromCurrentNode = edges.filter(
+      (edge) => edge.source === currentNodeObj.id
+    );
+    if (edgesFromCurrentNode.length === 1) {
       const targetNode = nodes.find(
-        (node) =>
-          node.id ===
-          edges.find((edge) => edge.source === currentNode.id).target
+        (node) => node.id === edgesFromCurrentNode[0].target
       );
-      if (targetNode.data.level < currentNode.level) {
+      if (targetNode && targetNode.data.level < currentNodeObj.data.level) {
         setEdges((eds) =>
           removeEdges(currentNode.id, targetNode.id, eds).concat(
             {
@@ -332,6 +362,7 @@ export const addChildNode = (currentNode, nodes, setNodes, edges, setEdges) => {
           )
         );
       } else {
+        // 4.新增一条线，由当前节点指向新增子节点
         setEdges((eds) =>
           eds.concat({
             id: `${currentNode.id}-${newNodeId}`,
@@ -341,6 +372,7 @@ export const addChildNode = (currentNode, nodes, setNodes, edges, setEdges) => {
         );
       }
     } else {
+      // 4.新增一条线，由当前节点指向新增子节点
       setEdges((eds) =>
         eds.concat({
           id: `${currentNode.id}-${newNodeId}`,

@@ -72,19 +72,20 @@ const Flow = () => {
       const newEdge = {
         ...params,
         type: "default",
+        id: `${params.source}-${params.target}`, // 新增边的 id
       };
-
-      // 如果连线的起点是根节点,则将 source 设置为 'root'
+  
+      // 如果连线的起点是根节点,则将 source 设置为 '0'
       if (params.source === rootNode.id) {
         newEdge.source = "0";
       }
-
+  
       // 如果连线的终点是新增节点,则将 target 设置为新节点的 id
       const newNodeId = `${nodes.length + 1}`;
       if (params.target === newNodeId) {
         newEdge.target = newNodeId;
       }
-
+  
       setEdges((eds) => addEdge(newEdge, eds));
     },
     [nodes, rootNode]
