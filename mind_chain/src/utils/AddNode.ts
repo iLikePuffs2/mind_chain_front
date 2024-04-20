@@ -24,7 +24,7 @@ export const findLeafNodes = (nodeId, nodes, edges) => {
   const leafNodes = [];
 
   const dfs = (currentNodeId) => {
-    const currentNode = nodes.find((node) => node.id === currentNodeId);
+    const currentNode = nodes.find((node) => node.id === String(currentNodeId));
     if (!currentNode) {
       return; // 如果找不到当前节点，直接返回
     }
