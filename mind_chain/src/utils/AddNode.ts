@@ -161,6 +161,7 @@ export const addSiblingNode = (
     } else {
       const leafNodes = findLeafNodes(currentNode.id, nodes, edges);
       const newEdgesToSiblingNode = leafNodes.map((leafNode) => ({
+        id: `${leafNode.id}-${newNodeId}`,
         source: leafNode.id,
         target: newNodeId,
       }));
