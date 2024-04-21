@@ -8,7 +8,7 @@ export const removeEdges = (sourceNodeId, targetNodeId, edges) =>
       )
   );
 
-// 获取某个节点的所有直接子节点
+// 获取某个节点的所有直接子节点(与当前节点直接相连，且level=当前节点level+1的节点，线段由当前节点指向直接子节点)
 export const findDirectChildNodes = (nodeId, nodes, edges) => {
   const currentNode = nodes.find((node) => node.id === String(nodeId));
   if (!currentNode) {

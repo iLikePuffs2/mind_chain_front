@@ -1,4 +1,5 @@
-import { calculateNodeLevels } from "./CalculateNodeLevels";
+import { calculateNodeLevels } from "./CalculateLevels";
+import { calculateNodeStatusAndDetails } from "./CalculateStatus";
 
 export const convertStatus = (nodes: Node[], edges: Edge[]) => {
   // 1.修改全部节点的parentId属性
@@ -15,6 +16,9 @@ export const convertStatus = (nodes: Node[], edges: Edge[]) => {
 
   // 2.计算节点的level值
   calculateNodeLevels(nodes, edges);
+
+  // 3.修改节点的status和details值
+  calculateNodeStatusAndDetails(nodes, edges);
 
   // 3.修改全部节点的颜色
   nodes.forEach((node) => {
@@ -39,7 +43,7 @@ export const convertStatus = (nodes: Node[], edges: Edge[]) => {
     } else if (status === 2) {
       // #ff6666是红色,#fad1d1是浅红色
       const containsSpecialReasons = detailsArray.some((detail) =>
-        [5, 6].includes(detail)
+        [3, 4].includes(detail)
       );
       color = containsSpecialReasons ? "#ff6666" : "#fad1d1";
     }

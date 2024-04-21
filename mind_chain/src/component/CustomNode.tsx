@@ -65,19 +65,19 @@ const CustomNode = ({ data, isConnectable, selected }) => {
     <div className="react-flow__node-group">
       <NodeToolbar isVisible={selected} position={Position.Right}>
         <Space size="middle">
-          <Dropdown overlay={plusMenu} placement="topCenter" trigger={["click"]}>
+          <Dropdown overlay={plusMenu} placement="top" trigger={["click"]}>
             <PlusCircleOutlined style={{ fontSize: 20 }} />
           </Dropdown>
           {!isRoot && (
             <>
               <CheckCircleOutlined style={{ fontSize: 20 }} />
-              <Dropdown overlay={stopMenu} placement="topCenter" trigger={["click"]}>
+              <Dropdown overlay={stopMenu} placement="top" trigger={["click"]}>
                 <StopOutlined style={{ fontSize: 20 }} />
               </Dropdown>
               <ClockCircleOutlined style={{ fontSize: 20 }} />
               <Dropdown
                 overlay={columnWidthMenu}
-                placement="topCenter"
+                placement="top"
                 trigger={["click"]}
               >
                 <ColumnWidthOutlined style={{ fontSize: 20 }} />
