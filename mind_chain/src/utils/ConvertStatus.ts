@@ -14,30 +14,34 @@ export const convertStatus = (nodes: Node[], edges: Edge[]) => {
   });
 
   // 2.计算节点的level值
-  // calculateNodeLevels(nodes, edges);
+  calculateNodeLevels(nodes, edges);
 
   // 3.修改全部节点的颜色
   nodes.forEach((node) => {
-    const { status, blockedReason } = node.data;
+    const { status, details } = node.data;
     let color;
 
-    const reasons =
-      blockedReason === null
+    const detailsArray =
+      details === null
         ? []
-        : Array.isArray(blockedReason)
-        ? blockedReason.map(Number)
-        : [Number(blockedReason)];
+        : Array.isArray(details)
+        ? details.map(Number)
+        : [Number(details)];
 
     if (status === 1) {
-      color = "#99e699"; // 浅绿色
+      // #99e699是浅绿色,#b3d1ff是浅蓝色
+      color =
+        detailsArray.length === 0
+          ? undefined
+          : detailsArray[0] === 1
+          ? "#99e699"
+          : "#b3d1ff";
     } else if (status === 2) {
-      color = "#b3d1ff"; // 浅蓝色
-    } else if (status === 3) {
-      color = reasons.some((reason) => [3, 4].includes(reason))
-        ? "#ff6666" // 红色
-        : reasons.some((reason) => [1, 2].includes(reason))
-        ? "#fad1d1" // 浅红色
-        : undefined;
+      // #ff6666是红色,#fad1d1是浅红色
+      const containsSpecialReasons = detailsArray.some((detail) =>
+        [5, 6].includes(detail)
+      );
+      color = containsSpecialReasons ? "#ff6666" : "#fad1d1";
     }
 
     // 将修改后的颜色赋值给节点的style属性(与data同级)

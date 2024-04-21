@@ -207,7 +207,7 @@ export const addSiblingNode = (
       priority: null,
       deadline: null,
       status: 1,
-      blockedReason: "0",
+      details: "1",
     },
     position: newNodePosition,
   };
@@ -357,7 +357,7 @@ export const addChildNode = (currentNode, nodes, setNodes, edges, setEdges) => {
       priority: null,
       deadline: null,
       status: 1,
-      blockedReason: "0",
+      details: "1",
     },
     position: newNodePosition,
   };
