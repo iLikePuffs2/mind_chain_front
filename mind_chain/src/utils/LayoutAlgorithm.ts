@@ -1,7 +1,7 @@
 import { type Node, type Edge } from "reactflow";
 import { hierarchy, tree } from "d3-hierarchy";
 import { type HierarchyPointNode } from "d3-hierarchy";
-import { convertStatus } from "./ConvertStatus";
+import { convertStatus } from "./ConvertStatus/ConvertStatus";
 
 const getPosition = (x: number, y: number) => ({ x, y });
 
