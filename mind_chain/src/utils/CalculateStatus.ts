@@ -5,13 +5,7 @@
  * @param edges 边列表
  */
 export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
-  const updatedNodes = nodes.map((node) => ({
-    ...node,
-    data: {
-      ...node.data,
-      details: new Set(node.data.details ? node.data.details.split(",") : []),
-    },
-  })); // 创建节点的副本,并将details转换为Set数组
+  const updatedNodes = nodes.map((node) => ({ ...node })); // 创建节点的副本
 
   // 找到所有最底层的节点(不作为任何线段source的节点)
   const bottomNodes = updatedNodes.filter(
@@ -26,11 +20,10 @@ export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
     const convergenceNode = findConvergenceNodeAbove(node, updatedNodes, edges); // 找到当前节点上方的收敛节点
     if (convergenceNode) {
       node.data.status = 2; // 将状态设为2
-      node.data.details.delete("1");
-      node.data.details.delete("2");
-      node.data.details.add("5");
+      node.data.details = node.data.details.replace("1", "").replace("2", ""); // 剔除详情1和2
+      node.data.details = node.data.details ? node.data.details + ",5" : "5"; // 添加详情5，考虑逗号
     } else {
-      node.data.details.delete("5");
+      node.data.details = node.data.details.replace(",5", "").replace("5", ""); // 移除详情5，考虑逗号
     }
   }
 
@@ -42,11 +35,12 @@ export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
       const parentNodes = getDirectParentNodes(node.id, updatedNodes, edges); // 获取直接父节点
       if (parentNodes.length === 1 && parentNodes[0].data.status === 2) {
         node.data.status = 2; // 将状态设为2
-        node.data.details.delete("1");
-        node.data.details.delete("2");
-        node.data.details.add("6");
+        node.data.details = node.data.details.replace("1", "").replace("2", ""); // 剔除详情1和2
+        node.data.details = node.data.details ? node.data.details + ",6" : "6"; // 添加详情6,考虑逗号
       } else {
-        node.data.details.delete("6");
+        node.data.details = node.data.details
+          .replace(",6", "")
+          .replace("6", ""); // 移除详情6,考虑逗号
       }
     });
   });
@@ -62,11 +56,12 @@ export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
         childNodes.every((childNode) => childNode.data.status === 2)
       ) {
         node.data.status = 2; // 将状态设为2
-        node.data.details.delete("1");
-        node.data.details.delete("2");
-        node.data.details.add("7");
+        node.data.details = node.data.details.replace("1", "").replace("2", ""); // 剔除详情1和2
+        node.data.details = node.data.details ? node.data.details + ",7" : "7"; // 添加详情7,考虑逗号
       } else {
-        node.data.details.delete("7");
+        node.data.details = node.data.details
+          .replace(",7", "")
+          .replace("7", ""); // 移除详情7,考虑逗号
       }
     });
   });
@@ -74,29 +69,33 @@ export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
   // 第四次遍历:可直接执行、有任意子节点可执行
   for (let i = updatedNodes.length - 1; i >= 0; i--) {
     const node = updatedNodes[i];
-    if (node.id === "0") return; // 跳过根节点
+    if (node.id === "0") break; // 跳过根节点
 
     if (
-      !node.data.details.has("3") &&
-      !node.data.details.has("4") &&
-      !node.data.details.has("5") &&
-      !node.data.details.has("6") &&
-      !node.data.details.has("7")
+      !node.data.details.includes("3") &&
+      !node.data.details.includes("4") &&
+      !node.data.details.includes("5") &&
+      !node.data.details.includes("6") &&
+      !node.data.details.includes("7")
     ) {
       const childNodes = getDirectChildNodes(node.id, updatedNodes, edges); // 获取直接子节点
       if (childNodes.length === 0) {
         node.data.status = 1; // 将状态设为1
-        node.data.details = new Set(["1"]);
+        node.data.details = "1"; // 设置详情为1
       } else if (childNodes.some((childNode) => childNode.data.status === 1)) {
         node.data.status = 1; // 将状态设为1
-        node.data.details = new Set(["2"]);
+        node.data.details = "2"; // 设置详情为2
       }
     }
   }
 
-  // 将Set数组转换回字符串格式
   updatedNodes.forEach((node) => {
-    node.data.details = Array.from(node.data.details).join(",");
+    if (node.data.details) {
+      const uniqueDetails = Array.from(
+        new Set(node.data.details.split(","))
+      ).join(",");
+      node.data.details = uniqueDetails;
+    }
   });
 
   return updatedNodes;

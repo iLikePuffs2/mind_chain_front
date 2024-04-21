@@ -1,4 +1,3 @@
-import { calculateNodeLevels } from "./CalculateLevels";
 import { calculateNodeStatusAndDetails } from "./CalculateStatus";
 
 export const convertStatus = (nodes: Node[], edges: Edge[]) => {
@@ -24,14 +23,16 @@ export const convertStatus = (nodes: Node[], edges: Edge[]) => {
   nodes.forEach((node) => {
     const { status, details } = node.data;
     let color;
-
+  
     const detailsArray =
-      details === null
+      details === null || details === ""
         ? []
+        : typeof details === "string"
+        ? details.split(",").map(Number)
         : Array.isArray(details)
         ? details.map(Number)
         : [Number(details)];
-
+  
     if (status === 1) {
       // #99e699是浅绿色,#b3d1ff是浅蓝色
       color =
@@ -47,7 +48,7 @@ export const convertStatus = (nodes: Node[], edges: Edge[]) => {
       );
       color = containsSpecialReasons ? "#ff6666" : "#fad1d1";
     }
-
+  
     // 将修改后的颜色赋值给节点的style属性(与data同级)
     node.style = { backgroundColor: color };
   });
