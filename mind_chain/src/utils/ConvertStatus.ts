@@ -15,7 +15,7 @@ export const convertStatus = (nodes: Node[], edges: Edge[]) => {
   });
 
   // 2.计算节点的level值
-  calculateNodeLevels(nodes, edges);
+  // calculateNodeLevels(nodes, edges);
 
   // 3.修改节点的status和details值
   calculateNodeStatusAndDetails(nodes, edges);
