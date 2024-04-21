@@ -7,12 +7,15 @@ import {
   StopOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
+  BugOutlined,
+  HourglassOutlined,
   ColumnWidthOutlined,
   LeftOutlined,
   RightOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Menu, Space } from "antd";
 import { addSiblingNode, addChildNode } from "../utils/AddNode";
+import { blockNode } from "../utils/ConvertStatus/BlockNode";
 import { NodesEdgesContext } from "../pages/Flow";
 
 const CustomNode = ({ data, isConnectable, selected }) => {
@@ -46,7 +49,24 @@ const CustomNode = ({ data, isConnectable, selected }) => {
 
   const stopMenu = (
     <Menu>
-      <Menu.Item key="1">Stop</Menu.Item>
+      <Menu.Item
+        key="1"
+        onClick={() => blockNode(data, nodes, setNodes, edges, "4")}
+      >
+        <Space>
+          <ClockCircleOutlined />
+          <span>时间阻塞</span>
+        </Space>
+      </Menu.Item>
+      <Menu.Item
+        key="2"
+        onClick={() => blockNode(data, nodes, setNodes, edges, "3")}
+      >
+        <Space>
+          <BugOutlined />
+          <span>事件阻塞</span>
+        </Space>
+      </Menu.Item>
     </Menu>
   );
 
@@ -74,7 +94,7 @@ const CustomNode = ({ data, isConnectable, selected }) => {
               <Dropdown overlay={stopMenu} placement="top" trigger={["click"]}>
                 <StopOutlined style={{ fontSize: 20 }} />
               </Dropdown>
-              <ClockCircleOutlined style={{ fontSize: 20 }} />
+              <HourglassOutlined style={{ fontSize: 20 }} />
               <Dropdown
                 overlay={columnWidthMenu}
                 placement="top"
@@ -87,7 +107,11 @@ const CustomNode = ({ data, isConnectable, selected }) => {
         </Space>
       </NodeToolbar>
       {!isRoot && (
-        <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
+        <Handle
+          type="target"
+          position={Position.Top}
+          isConnectable={isConnectable}
+        />
       )}
       <div>{label}</div>
       <Handle
