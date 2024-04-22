@@ -65,6 +65,8 @@ export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
 
   bottomNodes.forEach((bottomNode) => {
     const paths = findPathsAbove(bottomNode.id, updatedNodes, edges);
+    // 反转 paths 中每个子数组的元素顺序
+    paths.forEach((subPath) => subPath.reverse());
     updateNodeStatusAndDetails(paths, updatedNodes, edges);
   });
 
@@ -274,7 +276,6 @@ function findPathsAbove(
   const paths: Node[][] = [];
   // 找出以指定节点为终点的所有边
   const incomingEdges = edges.filter((edge) => edge.target === nodeId);
-
   if (incomingEdges.length === 0) {
     // 如果没有入边,说明已经到达根节点,将当前节点作为一条路径返回
     paths.push([nodes.find((n) => n.id === nodeId)]);
@@ -283,9 +284,7 @@ function findPathsAbove(
     incomingEdges.forEach((edge) => {
       const subPaths = findPathsAbove(edge.source, nodes, edges);
       subPaths.forEach((subPath) => {
-        // 反转 subPath 数组(保证从叶子节点指向根节点)
-        const reversedSubPath = [...subPath].reverse();
-        paths.push([...reversedSubPath, nodes.find((n) => n.id === nodeId)]);
+        paths.push([...subPath, nodes.find((n) => n.id === nodeId)]);
       });
     });
   }
@@ -361,13 +360,27 @@ function updateNodeStatusAndDetails(
         childNodes.every((childNode) => childNode.data.status === 2)
       ) {
         node.data.status = 2;
-        node.data.details = node.data.details.replace("1", "").replace("2", "");
-        node.data.details = node.data.details ? node.data.details + ",7" : "7";
+        // 将 node.data.details 转换为 Set
+        const detailsSet = new Set(node.data.details.split(","));
+
+        // 移除 Set 中的 "1" 和 "2"
+        detailsSet.delete("1");
+        detailsSet.delete("2");
+
+        // 添加 "7" 到 Set 中
+        detailsSet.add("7");
+
+        // 将 Set 转换回以逗号分隔的字符串
+        node.data.details = Array.from(detailsSet).join(",");
       } else {
         // 反之，移除details里的7
-        node.data.details = node.data.details
-          .replace(",7", "")
-          .replace("7", "");
+        const detailsSet = new Set(node.data.details.split(","));
+
+        // 移除 Set 中的 "7"
+        detailsSet.delete("7");
+
+        // 将 Set 转换回以逗号分隔的字符串
+        node.data.details = Array.from(detailsSet).join(",");
 
         // 如果在移除 7 之后 details 没有值了,就将 node.data.status 设为 1
         if (node.data.details.trim() === "") {
