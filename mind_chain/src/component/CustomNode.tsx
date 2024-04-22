@@ -13,17 +13,18 @@ import {
   LeftOutlined,
   RightOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Menu, Space, Tooltip } from "antd";
+import { Dropdown, Menu, Space, Tooltip, DatePicker, Popover } from "antd";
 import { addSiblingNode, addChildNode } from "../utils/AddNode";
 import { blockNode } from "../utils/ConvertStatus/BlockNode";
 import { NodesEdgesContext } from "../pages/Flow";
 import AddBlockReason from "./Pop/AddBlockReason";
 
 const CustomNode = ({ data, isConnectable, selected }) => {
-  const { label, isRoot, blockedReason } = data;
+  const { label, isRoot, blockedReason, blockedTime } = data;
   const { nodes, setNodes, edges, setEdges } = useContext(NodesEdgesContext);
   const [showBlockReasonPop, setShowBlockReasonPop] = useState(false);
   const [blockReason, setBlockReason] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const plusMenu = (
     <Menu>
@@ -52,10 +53,7 @@ const CustomNode = ({ data, isConnectable, selected }) => {
 
   const stopMenu = (
     <Menu>
-      <Menu.Item
-        key="1"
-        onClick={() => blockNode(data, nodes, setNodes, edges, "4")}
-      >
+      <Menu.Item key="1" onClick={() => setShowDatePicker(true)}>
         <Space>
           <ClockCircleOutlined />
           <span>时间阻塞</span>
@@ -80,6 +78,29 @@ const CustomNode = ({ data, isConnectable, selected }) => {
       </Menu.Item>
     </Menu>
   );
+
+  const handleDatePickerChange = (value) => {
+    if (value) {
+      data.blockedTime = value.toDate();
+      blockNode(data, nodes, setNodes, edges, "4");
+    }
+    setShowDatePicker(false);
+  };
+
+  const getTooltipTitle = () => {
+    if (blockedReason) {
+      return blockedReason;
+    } else if (blockedTime) {
+      const year = blockedTime.getFullYear();
+      const month = String(blockedTime.getMonth() + 1).padStart(2, "0");
+      const day = String(blockedTime.getDate()).padStart(2, "0");
+      const hours = String(blockedTime.getHours()).padStart(2, "0");
+      const minutes = String(blockedTime.getMinutes()).padStart(2, "0");
+      const seconds = String(blockedTime.getSeconds()).padStart(2, "0");
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+    return null;
+  };
 
   return (
     <div className="react-flow__node-group">
@@ -115,12 +136,13 @@ const CustomNode = ({ data, isConnectable, selected }) => {
         />
       )}
       <Tooltip
-        title={blockedReason}
+        title={getTooltipTitle()}
         placement="top"
         overlayStyle={{ zIndex: 1000 }}
       >
         <div>{label}</div>
       </Tooltip>
+
       <Handle
         type="source"
         position={Position.Bottom}
@@ -143,6 +165,21 @@ const CustomNode = ({ data, isConnectable, selected }) => {
         value={blockReason}
         onChange={(e) => setBlockReason(e.target.value)}
       />
+
+      <Popover
+        content={
+          <DatePicker
+            showTime
+            onOk={handleDatePickerChange}
+            onCancel={() => setShowDatePicker(false)}
+          />
+        }
+        trigger="click"
+        visible={showDatePicker}
+        onVisibleChange={(visible) => setShowDatePicker(visible)}
+      >
+        <div></div>
+      </Popover>
     </div>
   );
 };
