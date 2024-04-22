@@ -12,12 +12,14 @@ import {
   ColumnWidthOutlined,
   LeftOutlined,
   RightOutlined,
+  SmileOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Menu, Space, Tooltip, DatePicker, Popover } from "antd";
 import { addSiblingNode, addChildNode } from "../utils/AddNode";
 import { blockNode } from "../utils/ConvertStatus/BlockNode";
 import { NodesEdgesContext } from "../pages/Flow";
 import AddBlockReason from "./Pop/AddBlockReason";
+import { unblock } from "../utils/ConvertStatus/Unblock";
 
 const CustomNode = ({ data, isConnectable, selected }) => {
   const { label, isRoot, blockedReason, blockedTime } = data;
@@ -53,13 +55,19 @@ const CustomNode = ({ data, isConnectable, selected }) => {
 
   const stopMenu = (
     <Menu>
-      <Menu.Item key="1" onClick={() => setShowDatePicker(true)}>
+      <Menu.Item key="1" onClick={() => unblock(data, nodes, setNodes, edges)}>
+        <Space>
+          <SmileOutlined />
+          <span>解除阻塞</span>
+        </Space>
+      </Menu.Item>
+      <Menu.Item key="2" onClick={() => setShowDatePicker(true)}>
         <Space>
           <ClockCircleOutlined />
           <span>时间阻塞</span>
         </Space>
       </Menu.Item>
-      <Menu.Item key="2" onClick={() => setShowBlockReasonPop(true)}>
+      <Menu.Item key="3" onClick={() => setShowBlockReasonPop(true)}>
         <Space>
           <BugOutlined />
           <span>事件阻塞</span>
@@ -154,12 +162,13 @@ const CustomNode = ({ data, isConnectable, selected }) => {
         visible={showBlockReasonPop}
         title="事件阻塞原因"
         onOk={() => {
-          data.blockedReason = blockReason;
-          blockNode(data, nodes, setNodes, edges, "3");
+          if (blockReason) {
+            data.blockedReason = blockReason;
+            blockNode(data, nodes, setNodes, edges, "3");
+          }
           setShowBlockReasonPop(false);
         }}
         onCancel={() => {
-          blockNode(data, nodes, setNodes, edges, "3");
           setShowBlockReasonPop(false);
         }}
         value={blockReason}
