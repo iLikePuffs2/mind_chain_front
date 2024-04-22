@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Handle, Position, NodeToolbar } from "reactflow";
 import {
   PlusCircleOutlined,
@@ -13,14 +13,17 @@ import {
   LeftOutlined,
   RightOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Menu, Space } from "antd";
+import { Dropdown, Menu, Space, Tooltip } from "antd";
 import { addSiblingNode, addChildNode } from "../utils/AddNode";
 import { blockNode } from "../utils/ConvertStatus/BlockNode";
 import { NodesEdgesContext } from "../pages/Flow";
+import AddBlockReason from "./Pop/AddBlockReason";
 
 const CustomNode = ({ data, isConnectable, selected }) => {
-  const { label, isRoot } = data;
+  const { label, isRoot, blockedReason } = data;
   const { nodes, setNodes, edges, setEdges } = useContext(NodesEdgesContext);
+  const [showBlockReasonPop, setShowBlockReasonPop] = useState(false);
+  const [blockReason, setBlockReason] = useState("");
 
   const plusMenu = (
     <Menu>
@@ -58,10 +61,7 @@ const CustomNode = ({ data, isConnectable, selected }) => {
           <span>时间阻塞</span>
         </Space>
       </Menu.Item>
-      <Menu.Item
-        key="2"
-        onClick={() => blockNode(data, nodes, setNodes, edges, "3")}
-      >
+      <Menu.Item key="2" onClick={() => setShowBlockReasonPop(true)}>
         <Space>
           <BugOutlined />
           <span>事件阻塞</span>
@@ -106,6 +106,7 @@ const CustomNode = ({ data, isConnectable, selected }) => {
           )}
         </Space>
       </NodeToolbar>
+
       {!isRoot && (
         <Handle
           type="target"
@@ -113,12 +114,34 @@ const CustomNode = ({ data, isConnectable, selected }) => {
           isConnectable={isConnectable}
         />
       )}
-      <div>{label}</div>
+      <Tooltip
+        title={blockedReason}
+        placement="top"
+        overlayStyle={{ zIndex: 1000 }}
+      >
+        <div>{label}</div>
+      </Tooltip>
       <Handle
         type="source"
         position={Position.Bottom}
         isConnectable={isConnectable}
         style={isRoot ? { left: "50%", transform: "translate(-50%, 0)" } : {}}
+      />
+
+      <AddBlockReason
+        visible={showBlockReasonPop}
+        title="事件阻塞原因"
+        onOk={() => {
+          data.blockedReason = blockReason;
+          blockNode(data, nodes, setNodes, edges, "3");
+          setShowBlockReasonPop(false);
+        }}
+        onCancel={() => {
+          blockNode(data, nodes, setNodes, edges, "3");
+          setShowBlockReasonPop(false);
+        }}
+        value={blockReason}
+        onChange={(e) => setBlockReason(e.target.value)}
       />
     </div>
   );

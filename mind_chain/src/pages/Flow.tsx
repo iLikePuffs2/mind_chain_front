@@ -10,7 +10,7 @@ import ReactFlow, {
 } from "reactflow";
 import FlowButton from "../component/FlowButton";
 import SidebarDrawer from "../component/SidebarDrawer";
-import AddNotePop from "../component/AddNotePop";
+import AddNotePop from "../component/Pop/AddNotePop";
 import "../css/Flow.css";
 import { Note } from "../model/note";
 import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
