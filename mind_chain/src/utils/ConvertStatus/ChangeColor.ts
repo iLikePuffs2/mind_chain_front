@@ -22,7 +22,7 @@ export function changeColor(nodes: Node[], edges: Edge[]) {
           ? "#99e699"
           : "#b3d1ff";
     } else if (status === 2) {
-      // #ff6666是红色,#fad1d1是浅红色
+      // #ff6666是直接阻塞-红色；#fad1d1是间接阻塞-浅红色
       const containsSpecialReasons = detailsArray.some((detail) =>
         [3, 4].includes(detail)
       );

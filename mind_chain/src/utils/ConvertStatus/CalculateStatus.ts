@@ -79,8 +79,7 @@ export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
       !node.data.details.includes("3") &&
       !node.data.details.includes("4") &&
       !node.data.details.includes("5") &&
-      !node.data.details.includes("6") &&
-      !node.data.details.includes("7")
+      !node.data.details.includes("6")
     ) {
       const childNodes = getDirectChildNodes(node.id, updatedNodes, edges); // 获取直接子节点
       if (childNodes.length === 0) {
@@ -354,7 +353,7 @@ function updateNodeStatusAndDetails(
 
       // 找到当前节点的直接子节点
       const childNodes = getDirectChildNodes(node.id, updatedNodes, edges);
-      // 如果全部直接子节点状态都为被阻塞，就把当前节点也设为被阻塞，details里补上7
+      // 如果全部直接子节点状态都为被阻塞，就把当前节点也设为被阻塞，details里补上6
       if (
         childNodes.length > 0 &&
         childNodes.every((childNode) => childNode.data.status === 2)
@@ -367,22 +366,22 @@ function updateNodeStatusAndDetails(
         detailsSet.delete("1");
         detailsSet.delete("2");
 
-        // 添加 "7" 到 Set 中
-        detailsSet.add("7");
+        // 添加 "6" 到 Set 中
+        detailsSet.add("6");
 
         // 将 Set 转换回以逗号分隔的字符串
         node.data.details = Array.from(detailsSet).join(",");
       } else {
-        // 反之，移除details里的7
+        // 反之，移除details里的6
         const detailsSet = new Set(node.data.details.split(","));
 
-        // 移除 Set 中的 "7"
-        detailsSet.delete("7");
+        // 移除 Set 中的 "6"
+        detailsSet.delete("6");
 
         // 将 Set 转换回以逗号分隔的字符串
         node.data.details = Array.from(detailsSet).join(",");
 
-        // 如果在移除 7 之后 details 没有值了,就将 node.data.status 设为 1
+        // 如果在移除 6 之后 details 没有值了,就将 node.data.status 设为 1
         if (node.data.details.trim() === "") {
           node.data.status = 1;
         }
