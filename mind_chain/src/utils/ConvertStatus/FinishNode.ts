@@ -48,9 +48,13 @@ export const FinishNode = (
     // 获取直接父节点
     const parentNodes = getDirectParentNodes(currentNodeObj.id, nodes, edges);
 
-    // 如果直接父节点的 level < 当前节点,且直接父节点作为不止一条线段的 source,就不连线
+    // 获取当前节点的直接父节点下方的非同级收敛节点
+    const parentConvergenceNode = findConvergenceNode(parentNodes[0], nodes, edges);
+
+    // 如果直接父节点:数量=1，且拥有下方的非同级收敛节点，且 level < 当前节点，且作为不止一条线段的 source,就不连线
     const shouldNotConnect =
       parentNodes.length === 1 &&
+      parentConvergenceNode &&
       parentNodes[0].data.level < currentNodeObj.data.level &&
       edges.filter((edge) => edge.source === parentNodes[0].id).length > 1;
 
