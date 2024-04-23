@@ -44,11 +44,15 @@ export const FinishNode = (
       (edge) => edge.target === String(currentNode.id)
     );
 
-    // 如果以当前节点为target的线段数量等于1,且这条线段的source对应的节点作为不止一条线段的source,就不连线
+    const sourceNode = nodes.find(
+        (node) => node.id === incomingEdges[0].source
+    );
+
+    // 如果以当前节点为target的线段数量等于1,且这条线段的source对应的节点作为不止一条线段的source,且收敛节点的level=直接父节点的level，就不连线
     const hasMultipleOutgoingEdges =
       incomingEdges.length === 1 &&
       edges.filter((edge) => edge.source === incomingEdges[0].source).length >
-        1;
+        1 && convergenceNode.data.level === sourceNode.data.level;
 
     if (!hasMultipleOutgoingEdges) {
       const newEdges = incomingEdges.map((edge) => ({
