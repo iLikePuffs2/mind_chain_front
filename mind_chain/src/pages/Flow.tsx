@@ -15,18 +15,18 @@ import "../css/Flow.css";
 import { Note } from "../model/note";
 import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
 import CustomNode from "../component/CustomNode";
-import { createContext } from 'react';
+import { createContext } from "react";
 
 const initialNodes = [];
 const initialEdges = [];
-// 保存状态转为'已完成'的节点数组
-const finishedNodes = [];
 
 export const NodesEdgesContext = createContext({
   nodes: [],
   setNodes: () => {},
   edges: [],
   setEdges: () => {},
+  finishedMap: new Map(),
+  setFinishedMap: () => {},
 });
 
 const nodeTypes = {
@@ -36,6 +36,7 @@ const nodeTypes = {
 const Flow = () => {
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
+  const [finishedMap, setFinishedMap] = useState(new Map());
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const [newNoteName, setNewNoteName] = useState("");
@@ -48,11 +49,11 @@ const Flow = () => {
   const [rootNode, setRootNode] = useState({
     id: "0",
     type: "customNode",
-    data: { 
-      label: "未命名笔记", 
-      isRoot: true, 
+    data: {
+      label: "未命名笔记",
+      isRoot: true,
       id: 0,
-      level: 0
+      level: 0,
     },
     position: { x: 0, y: 0 },
   });
@@ -74,18 +75,18 @@ const Flow = () => {
         type: "default",
         id: `${params.source}-${params.target}`, // 新增边的 id
       };
-  
+
       // 如果连线的起点是根节点,则将 source 设置为 '0'
       if (params.source === rootNode.id) {
         newEdge.source = "0";
       }
-  
+
       // 如果连线的终点是新增节点,则将 target 设置为新节点的 id
       const newNodeId = `${nodes.length + 1}`;
       if (params.target === newNodeId) {
         newEdge.target = newNodeId;
       }
-  
+
       setEdges((eds) => addEdge(newEdge, eds));
     },
     [nodes, rootNode]
@@ -259,11 +260,11 @@ const Flow = () => {
           // 根节点
           {
             id: "0",
-            data: { 
-              label: note ? note.name : "未命名笔记", 
-              isRoot: true, 
+            data: {
+              label: note ? note.name : "未命名笔记",
+              isRoot: true,
               id: 0,
-              level: 0
+              level: 0,
             },
             position: { x: 0, y: 0 },
             type: "customNode",
@@ -319,7 +320,9 @@ const Flow = () => {
   };
 
   return (
-    <NodesEdgesContext.Provider value={{ nodes, setNodes, edges, setEdges }}>
+    <NodesEdgesContext.Provider
+      value={{ nodes, setNodes, edges, setEdges, finishedMap, setFinishedMap }}
+    >
       <div className="app-container">
         <ReactFlowProvider>
           <div className="icon-container" onClick={showDrawer}>

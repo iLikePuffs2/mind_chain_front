@@ -86,7 +86,7 @@ const getMaxNodeId = (nodes) => {
   }, 0);
 };
 
-// 找到当前节点向下路径中的收敛节点
+// 找到当前节点向下路径中的收敛节点(非同级收敛节点)
 export const findConvergenceNode = (currentNode, nodes, edges) => {
   const visited = new Set();
   let convergenceNode = null;

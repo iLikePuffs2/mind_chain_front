@@ -20,10 +20,12 @@ import { blockNode } from "../utils/ConvertStatus/BlockNode";
 import { NodesEdgesContext } from "../pages/Flow";
 import AddBlockReason from "./Pop/AddBlockReason";
 import { unblock } from "../utils/ConvertStatus/Unblock";
+import { FinishNode } from "../utils/ConvertStatus/FinishNode";
 
 const CustomNode = ({ data, isConnectable, selected }) => {
   const { label, isRoot, blockedReason, blockedTime } = data;
-  const { nodes, setNodes, edges, setEdges } = useContext(NodesEdgesContext);
+  const { nodes, setNodes, edges, setEdges, finishedMap, setFinishedMap } =
+    useContext(NodesEdgesContext);
   const [showBlockReasonPop, setShowBlockReasonPop] = useState(false);
   const [blockReason, setBlockReason] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -119,7 +121,20 @@ const CustomNode = ({ data, isConnectable, selected }) => {
           </Dropdown>
           {!isRoot && (
             <>
-              <CheckCircleOutlined style={{ fontSize: 20 }} />
+              <CheckCircleOutlined
+                style={{ fontSize: 20 }}
+                onClick={() =>
+                  FinishNode(
+                    data,
+                    nodes,
+                    setNodes,
+                    edges,
+                    setEdges,
+                    finishedMap,
+                    setFinishedMap
+                  )
+                }
+              />
               <Dropdown overlay={stopMenu} placement="top" trigger={["click"]}>
                 <StopOutlined style={{ fontSize: 20 }} />
               </Dropdown>

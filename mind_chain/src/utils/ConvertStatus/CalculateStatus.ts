@@ -1,3 +1,5 @@
+import { Node } from "reactflow";
+
 /**
  * 计算节点的状态和详情
  *
@@ -190,7 +192,7 @@ function getDirectChildNodes(
  * @param edges 边列表
  * @returns 下方的收敛节点,如果没有则返回null
  */
-function findConvergenceNodeBelow(
+export function findConvergenceNodeBelow(
   node: Node,
   nodes: Node[],
   edges: Edge[]
@@ -233,7 +235,7 @@ function findConvergenceNodeBelow(
  * @param edges 边列表
  * @returns 所有向下的路径
  */
-function findPathsBelow(
+export function findPathsBelow(
   nodeId: string,
   nodes: Node[],
   edges: Edge[]
@@ -298,7 +300,7 @@ function findPathsAbove(
  * @param edges 边列表
  * @returns
  */
-function findNodesUnderConvergenceNode(
+export function findNodesUnderConvergenceNode(
   convergenceNode: Node,
   nodes: Node[],
   edges: Edge[]
@@ -308,7 +310,7 @@ function findNodesUnderConvergenceNode(
 
   paths.forEach((path) => {
     path.forEach((node) => {
-      nodesSet.add(node.id);
+      if(node !== undefined) nodesSet.add(node.id);
     });
   });
 
@@ -321,7 +323,7 @@ function findNodesUnderConvergenceNode(
  * @param paths 路径列表
  * @returns 第一次交汇的节点,如果没有则返回null
  */
-function findFirstCommonNode(paths: Node[][]): Node | null {
+function findFirstCommonNode(paths: Node[][]) {
   if (paths.length === 0) {
     return null;
   }
@@ -349,7 +351,7 @@ function updateNodeStatusAndDetails(
 ) {
   paths.forEach((path) => {
     path.forEach((node) => {
-      if (node.id === "0") return; // 跳过根节点
+      if (node && node.id === "0") return; // 跳过根节点
 
       // 找到当前节点的直接子节点
       const childNodes = getDirectChildNodes(node.id, updatedNodes, edges);
