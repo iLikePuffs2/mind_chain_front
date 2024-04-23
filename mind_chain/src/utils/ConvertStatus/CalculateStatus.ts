@@ -254,20 +254,12 @@ export function findConvergenceNodeBelow(
     paths.push(...path);
   });
 
-  // 如果路径只有一条
-  if (paths.length == 1) {
-    // 遍历路径中的每个节点,和当前节点的level比较,如果一致,就把这个节点返回
-    for (const child of paths[0]) {
-      if (child.data.level === node.data.level) {
-        return child;
-      }
-    }
-  } else {
-    // 找出所有路径第一次交汇的节点
-    const convergenceNode = findFirstCommonNode(paths);
+  // 找出所有路径交汇的所有节点
+  const convergenceNodes = findAllCommonNodes(paths);
 
-    // 如果交汇节点的level与当前节点相同,则该节点为收敛节点
-    if (convergenceNode && convergenceNode.data.level === node.data.level) {
+  // 遍历交汇节点,和当前节点的level比较,并返回第一个和当前节点level相同的节点
+  for (const convergenceNode of convergenceNodes) {
+    if (convergenceNode.data.level === node.data.level) {
       return convergenceNode;
     }
   }
@@ -366,14 +358,14 @@ export function findNodesUnderConvergenceNode(
 }
 
 /**
- * 找出多条路径第一次交汇的节点
+ * 找出多条路径交汇的所有节点
  *
  * @param paths 路径列表
- * @returns 第一次交汇的节点,如果没有则返回null
+ * @returns 交汇的所有节点,如果没有则返回空数组
  */
-function findFirstCommonNode(paths: Node[][]) {
+function findAllCommonNodes(paths: Node[][]): Node[] {
   if (paths.length === 0) {
-    return null;
+    return [];
   }
 
   const visitedNodes = new Map<string, number>();
@@ -382,13 +374,20 @@ function findFirstCommonNode(paths: Node[][]) {
     for (const node of path) {
       const nodeId = node.id;
       visitedNodes.set(nodeId, (visitedNodes.get(nodeId) || 0) + 1);
-      if (visitedNodes.get(nodeId) === paths.length) {
-        return node;
-      }
     }
   }
 
-  return null;
+  const convergenceNodes: Node[] = [];
+  visitedNodes.forEach((count, nodeId) => {
+    if (count === paths.length) {
+      const node = paths[0].find((n) => n.id === nodeId);
+      if (node) {
+        convergenceNodes.push(node);
+      }
+    }
+  });
+
+  return convergenceNodes;
 }
 
 // 遍历路径和节点,更新节点的状态和详情
