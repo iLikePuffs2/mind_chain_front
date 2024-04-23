@@ -1,8 +1,8 @@
 import { Node, Edge } from "reactflow";
-import { applyNodeChanges, applyEdgeChanges } from "reactflow";
 import { findNodesUnderConvergenceNode } from "./CalculateStatus";
 import { findConvergenceNode } from "../AddNode";
 import { convertStatus } from "./ConvertStatus";
+import { getDirectParentNodes } from "./CalculateStatus";
 
 export const FinishNode = (
   currentNode,
@@ -40,21 +40,22 @@ export const FinishNode = (
     }
 
     // 先连线
+    // 指向当前节点的所有线段
     const incomingEdges = edges.filter(
-      (edge) => edge.target === String(currentNode.id)
+      (edge) => edge.target === currentNodeObj.id
     );
 
-    const sourceNode = nodes.find(
-        (node) => node.id === incomingEdges[0].source
-    );
+    // 获取直接父节点
+    const parentNodes = getDirectParentNodes(currentNodeObj.id, nodes, edges);
 
-    // 如果以当前节点为target的线段数量等于1,且这条线段的source对应的节点作为不止一条线段的source,且收敛节点的level=直接父节点的level，就不连线
-    const hasMultipleOutgoingEdges =
-      incomingEdges.length === 1 &&
-      edges.filter((edge) => edge.source === incomingEdges[0].source).length >
-        1 && convergenceNode.data.level === sourceNode.data.level;
+    // 如果直接父节点的 level < 当前节点,且直接父节点作为不止一条线段的 source,就不连线
+    const shouldNotConnect =
+      parentNodes.length === 1 &&
+      parentNodes[0].data.level < currentNodeObj.data.level &&
+      edges.filter((edge) => edge.source === parentNodes[0].id).length > 1;
 
-    if (!hasMultipleOutgoingEdges) {
+    if (!shouldNotConnect) {
+      // 把指向当前节点的线,全部连到收敛节点上
       const newEdges = incomingEdges.map((edge) => ({
         ...edge,
         target: convergenceNode.id,

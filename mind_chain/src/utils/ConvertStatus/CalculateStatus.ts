@@ -184,7 +184,7 @@ function bfs(
  * @param edges 边列表
  * @returns 直接父节点列表
  */
-function getDirectParentNodes(
+export function getDirectParentNodes(
   nodeId: string,
   nodes: Node[],
   edges: Edge[]
