@@ -59,12 +59,70 @@ export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
     }
   });
 
-  // 第二次遍历:全部的直接子节点被阻塞
   // 找到所有最底层的节点(不作为任何线段source的节点)
   const bottomNodes = updatedNodes.filter(
     (node) => !edges.some((edge) => edge.source === node.id)
   );
 
+  // 第二次遍历:当前节点向上的这条路径里,存在被直接阻塞的节点
+  const markedNodes = new Set<string>();
+
+  bottomNodes.forEach((bottomNode) => {
+    let currentNode = bottomNode;
+    while (currentNode.id !== "0") {
+      const parentNodes = getDirectParentNodes(
+        currentNode.id,
+        updatedNodes,
+        edges
+      );
+      if (parentNodes.length > 1) break; // 如果有多个直接父节点,就break
+      if (!parentNodes[0]) break;
+      if (parentNodes[0].id === "0") break;
+
+      if (
+        parentNodes[0].data.details.includes("3") ||
+        parentNodes[0].data.details.includes("4")
+      ) {
+        // 找到被直接阻塞的节点
+        const nodesUnderParent = findNodesUnderNode(
+          parentNodes[0],
+          updatedNodes,
+          edges
+        );
+        nodesUnderParent.forEach((nodeId) => {
+          if (nodeId !== parentNodes[0].id) {
+            // 排除被直接阻塞的节点本身
+            const node = updatedNodes.find((n) => n.id === nodeId);
+            if (node) {
+              node.data.status = 2;
+              if (
+                node.data.details.includes("1") ||
+                node.data.details.includes("2")
+              ) {
+                node.data.details = "7"; // 如果details里包含1或2,就直接将details覆盖为7
+              } else {
+                node.data.details = node.data.details
+                  ? node.data.details + ",7"
+                  : "7";
+              }
+              markedNodes.add(node.id);
+            }
+          }
+        });
+        break;
+      }
+      currentNode = parentNodes[0];
+    }
+  });
+
+  // 移除未被标记节点的details里的7
+  updatedNodes.forEach((node) => {
+    if (!markedNodes.has(node.id) && node.id !== "0") {
+      node.data.details = node.data.details.replace(",7", "").replace("7", "");
+    }
+  });
+
+  // 第三次遍历:全部的直接子节点被阻塞
   bottomNodes.forEach((bottomNode) => {
     const paths = findPathsAbove(bottomNode.id, updatedNodes, edges);
     // 反转 paths 中每个子数组的元素顺序
@@ -72,7 +130,7 @@ export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
     updateNodeStatusAndDetails(paths, updatedNodes, edges);
   });
 
-  // 第三次遍历:可直接执行、有任意子节点可执行
+  // 第四次遍历:可直接执行、有任意子节点可执行
   for (let i = updatedNodes.length - 1; i >= 0; i--) {
     const node = updatedNodes[i];
     if (node.id === "0") break; // 跳过根节点
@@ -81,7 +139,8 @@ export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
       !node.data.details.includes("3") &&
       !node.data.details.includes("4") &&
       !node.data.details.includes("5") &&
-      !node.data.details.includes("6")
+      !node.data.details.includes("6") &&
+      !node.data.details.includes("7")
     ) {
       const childNodes = getDirectChildNodes(node.id, updatedNodes, edges); // 获取直接子节点
       if (childNodes.length === 0) {
@@ -310,7 +369,7 @@ export function findNodesUnderConvergenceNode(
 
   paths.forEach((path) => {
     path.forEach((node) => {
-      if(node !== undefined) nodesSet.add(node.id);
+      if (node !== undefined) nodesSet.add(node.id);
     });
   });
 
@@ -390,4 +449,29 @@ function updateNodeStatusAndDetails(
       }
     });
   });
+}
+
+/**
+ * 找到以指定节点为起点向下的所有路径中经过的所有节点
+ *
+ * @param node 指定节点
+ * @param nodes 节点列表
+ * @param edges 边列表
+ * @returns 所有向下路径经过的节点ID
+ */
+function findNodesUnderNode(
+  node: Node,
+  nodes: Node[],
+  edges: Edge[]
+): string[] {
+  const paths = findPathsBelow(node.id, nodes, edges);
+  const nodesSet = new Set<string>();
+
+  paths.forEach((path) => {
+    path.forEach((node) => {
+      if (node !== undefined) nodesSet.add(node.id);
+    });
+  });
+
+  return Array.from(nodesSet);
 }
