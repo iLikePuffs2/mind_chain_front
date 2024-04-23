@@ -59,75 +59,54 @@ export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
     }
   });
 
+  // 第二次遍历:全部的直接子节点被阻塞
   // 找到所有最底层的节点(不作为任何线段source的节点)
   const bottomNodes = updatedNodes.filter(
     (node) => !edges.some((edge) => edge.source === node.id)
   );
-
-  // 第二次遍历:当前节点向上的这条路径里,存在被直接阻塞的节点
-  const markedNodes = new Set<string>();
-
-  bottomNodes.forEach((bottomNode) => {
-    let currentNode = bottomNode;
-    while (currentNode.id !== "0") {
-      const parentNodes = getDirectParentNodes(
-        currentNode.id,
-        updatedNodes,
-        edges
-      );
-      if (parentNodes.length > 1) break; // 如果有多个直接父节点,就break
-      if (!parentNodes[0]) break;
-      if (parentNodes[0].id === "0") break;
-
-      if (
-        parentNodes[0].data.details.includes("3") ||
-        parentNodes[0].data.details.includes("4")
-      ) {
-        // 找到被直接阻塞的节点
-        const nodesUnderParent = findNodesUnderNode(
-          parentNodes[0],
-          updatedNodes,
-          edges
-        );
-        nodesUnderParent.forEach((nodeId) => {
-          if (nodeId !== parentNodes[0].id) {
-            // 排除被直接阻塞的节点本身
-            const node = updatedNodes.find((n) => n.id === nodeId);
-            if (node) {
-              node.data.status = 2;
-              if (
-                node.data.details.includes("1") ||
-                node.data.details.includes("2")
-              ) {
-                node.data.details = "7"; // 如果details里包含1或2,就直接将details覆盖为7
-              } else {
-                node.data.details = node.data.details
-                  ? node.data.details + ",7"
-                  : "7";
-              }
-              markedNodes.add(node.id);
-            }
-          }
-        });
-        break;
-      }
-      currentNode = parentNodes[0];
-    }
-  });
-
-  // 移除未被标记节点的details里的7
-  updatedNodes.forEach((node) => {
-    if (!markedNodes.has(node.id) && node.id !== "0") {
-      node.data.details = node.data.details.replace(",7", "").replace("7", "");
-    }
-  });
-
-  // 第三次遍历:全部的直接子节点被阻塞
   bottomNodes.forEach((bottomNode) => {
     const paths = findPathsAbove(bottomNode.id, updatedNodes, edges);
     // 反转 paths 中每个子数组的元素顺序
     paths.forEach((subPath) => subPath.reverse());
     updateNodeStatusAndDetails(paths, updatedNodes, edges);
+  });
+
+  // 第三次遍历:当前节点的直接父节点被阻塞
+  const paths = findPathsBelow("0", updatedNodes, edges); // 以根节点为起点,找出所有向下的路径
+
+  paths.forEach((path) => {
+    path.forEach((node) => {
+      if (node.id !== "0") {
+        // 跳过根节点
+        const parentNodes = getDirectParentNodes(node.id, updatedNodes, edges);
+        if (parentNodes[0] && parentNodes[0].id !== "0") {
+          if (
+            parentNodes.length === 1 &&
+            (parentNodes[0].data.details.includes("3") ||
+              parentNodes[0].data.details.includes("4") ||
+              parentNodes[0].data.details.includes("7"))
+          ) {
+            // 如果直接父节点只有一个,且它的details里包含3或4或7
+            node.data.status = 2;
+            if (
+              node.data.details.includes("1") ||
+              node.data.details.includes("2")
+            ) {
+              node.data.details = "7"; // 如果details里包含1或2,就直接用7覆盖
+            } else {
+              node.data.details = node.data.details
+                ? node.data.details + ",7"
+                : "7"; // 否则,在details里添加7
+            }
+          } else {
+            // 反之,就在它的details里移除7
+            node.data.details = node.data.details
+              .replace(",7", "")
+              .replace("7", "");
+          }
+        }
+      }
+    });
   });
 
   // 第四次遍历:可直接执行、有任意子节点可执行
@@ -244,12 +223,12 @@ function getDirectChildNodes(
 }
 
 /**
- * 找到当前节点下方的收敛节点
+ * 找到当前节点下方的同级收敛节点
  *
  * @param node 当前节点
  * @param nodes 节点列表
  * @param edges 边列表
- * @returns 下方的收敛节点,如果没有则返回null
+ * @returns 下方的同级收敛节点,如果没有则返回null
  */
 export function findConvergenceNodeBelow(
   node: Node,
@@ -275,12 +254,22 @@ export function findConvergenceNodeBelow(
     paths.push(...path);
   });
 
-  // 找出所有路径第一次交汇的节点
-  const convergenceNode = findFirstCommonNode(paths);
+  // 如果路径只有一条
+  if (paths.length == 1) {
+    // 遍历路径中的每个节点,和当前节点的level比较,如果一致,就把这个节点返回
+    for (const child of paths[0]) {
+      if (child.data.level === node.data.level) {
+        return child;
+      }
+    }
+  } else {
+    // 找出所有路径第一次交汇的节点
+    const convergenceNode = findFirstCommonNode(paths);
 
-  // 如果交汇节点的level与当前节点相同,则该节点为收敛节点
-  if (convergenceNode && convergenceNode.data.level === node.data.level) {
-    return convergenceNode;
+    // 如果交汇节点的level与当前节点相同,则该节点为收敛节点
+    if (convergenceNode && convergenceNode.data.level === node.data.level) {
+      return convergenceNode;
+    }
   }
 
   return null;
@@ -414,10 +403,15 @@ function updateNodeStatusAndDetails(
 
       // 找到当前节点的直接子节点
       const childNodes = getDirectChildNodes(node.id, updatedNodes, edges);
-      // 如果全部直接子节点状态都为被阻塞，就把当前节点也设为被阻塞，details里补上6
+      // 如果全部直接子节点的details里都包含3或4或6,就把当前节点也设为被阻塞,details里补上6;反之，移除6
       if (
         childNodes.length > 0 &&
-        childNodes.every((childNode) => childNode.data.status === 2)
+        childNodes.every(
+          (childNode) =>
+            childNode.data.details.includes("3") ||
+            childNode.data.details.includes("4") ||
+            childNode.data.details.includes("6")
+        )
       ) {
         node.data.status = 2;
         // 将 node.data.details 转换为 Set
@@ -441,11 +435,6 @@ function updateNodeStatusAndDetails(
 
         // 将 Set 转换回以逗号分隔的字符串
         node.data.details = Array.from(detailsSet).join(",");
-
-        // 如果在移除 6 之后 details 没有值了,就将 node.data.status 设为 1
-        if (node.data.details.trim() === "") {
-          node.data.status = 1;
-        }
       }
     });
   });
