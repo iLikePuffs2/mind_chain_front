@@ -44,6 +44,8 @@ const Flow = () => {
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [renameNoteName, setRenameNoteName] = useState("");
   const [selectedNoteName, setSelectedNoteName] = useState("");
+  const [selectedNote, setSelectedNote] = useState(null);
+  const userId = sessionStorage.getItem("userId");
 
   // 根节点的初始值
   const [rootNode, setRootNode] = useState({
@@ -306,6 +308,9 @@ const Flow = () => {
             return edges;
           })
         );
+      // 保存当前选中的笔记和用户 ID
+      setSelectedNote(note);
+      sessionStorage.setItem("userId", userId);
       } else {
         console.error("获取笔记详情失败");
       }
@@ -317,6 +322,9 @@ const Flow = () => {
   const handleNoteClick = async (userId, noteId) => {
     await fetchNoteDetail(userId, noteId);
     setOpen(false); // 关闭抽屉
+    // 根据点击的笔记 ID 查找对应的笔记对象，并设置为 selectedNote
+    const note = notes.find((note) => note.id === parseInt(noteId));
+    setSelectedNote(note || null);
   };
 
   return (
@@ -339,6 +347,9 @@ const Flow = () => {
               onConnect={onConnect}
               onLayout={onLayout}
               nodeTypes={nodeTypes}
+              userId={userId}
+              noteId={selectedNote?.id || ""}
+              noteName={selectedNote?.name || ""}
             />
           </div>
         </ReactFlowProvider>

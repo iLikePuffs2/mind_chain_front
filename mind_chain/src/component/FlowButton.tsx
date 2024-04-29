@@ -1,8 +1,10 @@
 import React from "react";
-import ReactFlow, { Controls, Background, Panel} from "reactflow";
+import ReactFlow, { Controls, Background, Panel } from "reactflow";
 import "reactflow/dist/style.css";
 import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
 import useCopyPaste from "../utils/useCopyPaste";
+import { CheckSquareOutlined } from "@ant-design/icons";
+import { saveAndUpdateNote } from "../utils/ConvertStatus/SaveAndUpdateNote";
 
 function FlowButton({
   nodes,
@@ -14,6 +16,9 @@ function FlowButton({
   onConnect,
   onLayout,
   nodeTypes,
+  userId,
+  noteId,
+  noteName,
 }) {
   const { cut, copy, paste, bufferedNodes } = useCopyPaste();
   const canCopy = nodes.some(({ selected }) => selected);
@@ -23,6 +28,10 @@ function FlowButton({
     const layouted = LayoutAlgorithm(nodes, edges);
     setNodes([...layouted.nodes]);
     setEdges([...layouted.edges]);
+  };
+
+  const handleSaveAndUpdate = () => {
+    saveAndUpdateNote(userId, noteId, noteName, nodes);
   };
 
   return (
@@ -40,6 +49,10 @@ function FlowButton({
         <Controls />
         <Panel position="top-right">
           <button onClick={handleLayout}>重新排布</button>
+          <CheckSquareOutlined
+            style={{ fontSize: 20, marginLeft: 8 }}
+            onClick={handleSaveAndUpdate}
+          />
         </Panel>
       </ReactFlow>
     </div>
