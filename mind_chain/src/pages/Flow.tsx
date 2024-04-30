@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useContext } from "react";
-import { message,Input } from "antd";
+import { message } from "antd";
 import { RightCircleTwoTone } from "@ant-design/icons";
 import axios from "axios";
 import ReactFlow, {
@@ -16,7 +16,7 @@ import { Note } from "../model/note";
 import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
 import CustomNode from "../component/CustomNode";
 import { createContext } from "react";
-import Editor from '../pages/Editor';
+import Editor from "../pages/Editor";
 
 const initialNodes = [];
 const initialEdges = [];
@@ -258,7 +258,7 @@ const Flow = () => {
       const { code, data } = response.data;
       if (code === 0) {
         const { note, nodeList } = data;
-  
+
         // 为节点设置初始位置信息,并转换 blockedTime 的格式
         const initialNodes = [
           // 根节点
