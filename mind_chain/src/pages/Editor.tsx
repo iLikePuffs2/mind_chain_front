@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { List, Typography, Space, Input, message } from "antd";
+import { List, Typography, Space, Input } from "antd";
 import { CheckCircleOutlined, SmileOutlined } from "@ant-design/icons";
 import { getCurrentTaskList } from "../utils/Editor/CurrentTaskList";
 import { getBlockedTaskList } from "../utils/Editor/BlockedTaskList";
@@ -26,10 +26,12 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
   const [taskList, setTaskList] = useState([]);
   const [isCurrentTaskList, setIsCurrentTaskList] = useState(true);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [showContext, setShowContext] = useState(false);
 
   useEffect(() => {
     const selected = contextNodes.find((node) => node.selected);
     setSelectedNode(selected || null);
+    setShowContext(!!selected);
   }, [contextNodes]);
 
   const handleConfirm = () => {
@@ -41,7 +43,7 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
             data: {
               ...node.data,
               name: selectedNode.data.name,
-              label: selectedNode.data.name, // 更新 label 为 name
+              label: selectedNode.data.name,
               context: selectedNode.data.context,
             },
           };
@@ -49,7 +51,6 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
         return node;
       });
       setNodes(updatedNodes);
-      message.success("保存成功");
     }
   };
 
@@ -90,42 +91,16 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
   return (
     <div className="text-container">
       <div className="button-container">
-        <button onClick={() => setIsCurrentTaskList(true)}>当前任务列表</button>
-        <button onClick={() => setIsCurrentTaskList(false)}>
+        <button onClick={() => {setIsCurrentTaskList(true); setShowContext(false);}}>
+          当前任务列表
+        </button>
+        <button onClick={() => {setIsCurrentTaskList(false); setShowContext(false);}}>
           阻塞任务列表
         </button>
         <button>任务上下文</button>
       </div>
-      <List
-        size="small"
-        bordered
-        dataSource={taskList}
-        renderItem={(item: any) => (
-          <List.Item
-            actions={[
-              <Space size="middle" style={{ marginRight: 16 }}>
-                {isCurrentTaskList && item.nodeData && (
-                  <CheckCircleOutlined
-                    style={{ fontSize: 20 }}
-                    onClick={() => handleFinishNode(item.nodeData)}
-                  />
-                )}
-                {!isCurrentTaskList && item.nodeData && (
-                  <SmileOutlined
-                    style={{ fontSize: 20 }}
-                    onClick={() => handleUnblockNode(item.nodeData)}
-                  />
-                )}
-              </Space>,
-            ]}
-          >
-            <Typography.Text strong>{item.task}</Typography.Text>
-            {item.blockInfo && ` (${item.blockInfo})`} ({item.parent})
-          </List.Item>
-        )}
-      />
 
-      {selectedNode && (
+      {showContext && (
         <div>
           <Space>
             <Input
@@ -136,6 +111,7 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
                   data: { ...selectedNode.data, name: e.target.value },
                 })
               }
+              style={{ width: 300 }}
             />
             <CheckCircleOutlined
               style={{ fontSize: 20 }}
@@ -151,9 +127,41 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
               })
             }
             rows={4}
-            style={{ width: "100%" }}
+            style={{ width: "100%", marginTop: 16 }}
           />
         </div>
+      )}
+
+      {!showContext && (
+        <List
+          size="small"
+          bordered
+          dataSource={taskList}
+          renderItem={(item: any) => (
+            <List.Item
+              actions={[
+                <Space size="middle" style={{ marginRight: 16 }}>
+                  {isCurrentTaskList && item.nodeData && (
+                    <CheckCircleOutlined
+                      style={{ fontSize: 20 }}
+                      onClick={() => handleFinishNode(item.nodeData)}
+                    />
+                  )}
+                  {!isCurrentTaskList && item.nodeData && (
+                    <SmileOutlined
+                      style={{ fontSize: 20 }}
+                      onClick={() => handleUnblockNode(item.nodeData)}
+                    />
+                  )}
+                </Space>,
+              ]}
+            >
+              <Typography.Text strong>{item.task}</Typography.Text>
+              {item.blockInfo && ` (${item.blockInfo})`} ({item.parent})
+            </List.Item>
+          )}
+          style={{ marginTop: 16 }}
+        />
       )}
     </div>
   );
