@@ -20,9 +20,8 @@ export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
     }
   });
 
-  // b.然后找出以它们作为起始节点,向下的所有路径里经过的所有节点。再将所有收敛节点和这些节点的 status 设为2,details添加5
+  // b.然后找出以它们作为起始节点,向下的所有路径里经过的所有节点。再将所有收敛节点和这些节点的 status 设为2,details添加5,如果当前details值为1,就直接用5覆盖
   const nodesUnderConvergenceNodes = new Set<string>();
-
   convergenceNodes.forEach((convergenceNode) => {
     const nodesSet = findNodesUnderConvergenceNode(
       convergenceNode,
@@ -42,7 +41,11 @@ export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
       nodesUnderConvergenceNodes.has(node.id)
     ) {
       node.data.status = 2;
-      node.data.details = node.data.details ? node.data.details + ",5" : "5";
+      if (node.data.details === "1") {
+        node.data.details = "5";
+      } else {
+        node.data.details = node.data.details ? node.data.details + ",5" : "5";
+      }
     }
   });
 
