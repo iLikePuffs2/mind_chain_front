@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useContext } from "react";
-import { message } from "antd";
+import { message,Input } from "antd";
 import { RightCircleTwoTone } from "@ant-design/icons";
 import axios from "axios";
 import ReactFlow, {
@@ -16,6 +16,7 @@ import { Note } from "../model/note";
 import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
 import CustomNode from "../component/CustomNode";
 import { createContext } from "react";
+import Editor from '../pages/Editor';
 
 const initialNodes = [];
 const initialEdges = [];
@@ -257,8 +258,8 @@ const Flow = () => {
       const { code, data } = response.data;
       if (code === 0) {
         const { note, nodeList } = data;
-
-        // 为节点设置初始位置信息
+  
+        // 为节点设置初始位置信息,并转换 blockedTime 的格式
         const initialNodes = [
           // 根节点
           {
@@ -274,21 +275,22 @@ const Flow = () => {
           },
           ...nodeList.map((node) => ({
             id: node.id.toString(),
-            data: { label: node.name, ...node },
+            data: {
+              label: node.name,
+              ...node,
+              blockedTime: node.blockedTime ? new Date(node.blockedTime) : null,
+            },
             position: { x: 0, y: 0 },
             type: "customNode",
           })),
         ];
-
         setNodes(initialNodes);
-
         // 根据节点的 parentId 设置 edges 数组
         setEdges(
           nodeList.flatMap((node) => {
             const edges = [];
-
             if (node.parentId !== null) {
-              // 如果 parentId 不为 null，则根据逗号分隔的情况创建多条边
+              // 如果 parentId 不为 null,则根据逗号分隔的情况创建多条边
               const parentIds = node.parentId.split(",");
               parentIds.forEach((parentId) => {
                 edges.push({
@@ -298,14 +300,13 @@ const Flow = () => {
                 });
               });
             } else if (node.id !== "0") {
-              // 如果 parentId 为 null，且节点 id 不为 "0"（根节点），则创建一条从根节点到该节点的边
+              // 如果 parentId 为 null,且节点 id 不为 "0"（根节点）,则创建一条从根节点到该节点的边
               edges.push({
                 id: `0-${node.id}`,
                 source: "0",
                 target: node.id.toString(),
               });
             }
-
             return edges;
           })
         );
@@ -354,14 +355,7 @@ const Flow = () => {
             />
           </div>
         </ReactFlowProvider>
-        <div className="text-container">
-          <div className="button-container">
-            <button>当前任务列表</button>
-            <button>阻塞任务列表</button>
-            <button>任务上下文</button>
-          </div>
-          <textarea className="text-input" />
-        </div>
+        <Editor nodes={nodes} edges={edges} />
         <SidebarDrawer
           open={open}
           onClose={onClose}
