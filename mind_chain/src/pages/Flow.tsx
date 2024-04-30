@@ -178,6 +178,7 @@ const Flow = () => {
         setNewNoteName("");
         setModalVisible(false);
         await fetchNotes(); // 新增笔记后重新查询笔记列表
+        await fetchNoteDetail(userId); // 新增笔记后重新查询笔记详情
         message.success("新增成功");
       } else if (code === 1) {
         message.error("该笔记已存在");
@@ -199,9 +200,8 @@ const Flow = () => {
       const { code } = response.data;
       if (code === 0) {
         await fetchNotes();
+        await fetchNoteDetail(userId); // 删除笔记后重新查询笔记详情
         message.success("删除成功");
-        // 删除成功后，重新获取笔记详情，刷新Flow界面
-        await fetchNoteDetail(userId);
       } else {
         console.error(response.data.message);
       }
@@ -220,6 +220,7 @@ const Flow = () => {
       const { code, message: msg } = response.data;
       if (code === 0) {
         await fetchNotes();
+        await fetchNoteDetail(userId); // 重命名笔记后重新查询笔记详情
         message.success("重命名成功");
       } else if (code === 1) {
         message.error(msg); // 显示"笔记已存在"的错误消息
@@ -299,7 +300,7 @@ const Flow = () => {
             } else if (node.id !== "0") {
               // 如果 parentId 为 null，且节点 id 不为 "0"（根节点），则创建一条从根节点到该节点的边
               edges.push({
-                id: `e0-${node.id}`,
+                id: `0-${node.id}`,
                 source: "0",
                 target: node.id.toString(),
               });
@@ -308,9 +309,9 @@ const Flow = () => {
             return edges;
           })
         );
-      // 保存当前选中的笔记和用户 ID
-      setSelectedNote(note);
-      sessionStorage.setItem("userId", userId);
+        // 保存当前选中的笔记和用户 ID
+        setSelectedNote(note);
+        sessionStorage.setItem("userId", userId);
       } else {
         console.error("获取笔记详情失败");
       }
