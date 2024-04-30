@@ -291,7 +291,7 @@ const Flow = () => {
               const parentIds = node.parentId.split(",");
               parentIds.forEach((parentId) => {
                 edges.push({
-                  id: `e0-${node.id}`,
+                  id: `${parentId}-${node.id}`,
                   source: parentId,
                   target: node.id.toString(),
                 });

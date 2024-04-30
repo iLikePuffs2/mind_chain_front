@@ -1,4 +1,5 @@
 import axios from "axios";
+import { message } from "antd";
 
 export const saveAndUpdateNote = async (userId, noteId, noteName, nodes) => {
   try {
@@ -50,12 +51,12 @@ export const saveAndUpdateNote = async (userId, noteId, noteName, nodes) => {
       convertedNodes
     );
 
-    const { success, message } = response.data;
+    const { code } = response.data;
 
-    if (success) {
-      console.log("保存笔记内容成功");
+    if (code === 0) {
+      message.success("保存成功");
     } else {
-      console.error("保存笔记内容失败:", message);
+      message.error("保存失败");
     }
   } catch (error) {
     console.error("保存笔记内容失败", error);
