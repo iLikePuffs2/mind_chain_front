@@ -34,7 +34,7 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
   useEffect(() => {
     const selected = contextNodes.find((node) => node.selected);
     setSelectedNode(selected || null);
-    setShowContext(!!selected);
+    setShowContext(selected && selected.id !== "0");
   }, [contextNodes]);
 
   const handleConfirm = () => {
@@ -91,12 +91,17 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
     fetchTaskList();
   };
 
+  // 自动保存节点信息(忽略根节点)
   useEffect(() => {
     if (selectedNode) {
       const currentSelectedNode = contextNodes.find(
-        (node) => String(node.id) === String(selectedNode.id)
+        (node) => node.id === selectedNode.id
       );
-      if (currentSelectedNode && !currentSelectedNode.selected) {
+      if (
+        currentSelectedNode &&
+        !currentSelectedNode.selected &&
+        currentSelectedNode.id !== "0"
+      ) {
         handleConfirm();
       }
     }
