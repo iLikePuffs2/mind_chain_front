@@ -20,9 +20,9 @@ function FlowButton({
   noteId,
   noteName,
 }) {
-  const { cut, copy, paste, bufferedNodes } = useCopyPaste();
-  const canCopy = nodes.some(({ selected }) => selected);
-  const canPaste = bufferedNodes.length > 0;
+  // const { cut, copy, paste, bufferedNodes } = useCopyPaste();
+  // const canCopy = nodes.some(({ selected }) => selected);
+  // const canPaste = bufferedNodes.length > 0;
 
   const handleLayout = () => {
     const layouted = LayoutAlgorithm(nodes, edges);
