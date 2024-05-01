@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { List, Typography, Space, Input,message } from "antd";
+import { List, Typography, Space, Input } from "antd";
 import {
   CheckCircleOutlined,
   SmileOutlined,
@@ -54,7 +54,6 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
         return node;
       });
       setNodes(updatedNodes);
-      message.success("修改成功");
     }
   };
 
@@ -92,6 +91,17 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
     fetchTaskList();
   };
 
+  useEffect(() => {
+    if (selectedNode) {
+      const currentSelectedNode = contextNodes.find(
+        (node) => String(node.id) === String(selectedNode.id)
+      );
+      if (currentSelectedNode && !currentSelectedNode.selected) {
+        handleConfirm();
+      }
+    }
+  }, [contextNodes]);
+
   /* 接收一个节点 ID 作为参数，遍历 contextNodes 数组，将与该 ID 匹配的节点的 selected 值设为 true，
   其他节点的 selected 值设为 false */
   const handleSelectNode = (nodeId: number) => {
@@ -125,23 +135,19 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
 
       {/* 如果有节点被选中，就展示任务上下文 */}
       {showContext && (
-        <div>
-          <Space>
-            <Input
-              value={selectedNode.data.name}
-              onChange={(e) =>
-                setSelectedNode({
-                  ...selectedNode,
-                  data: { ...selectedNode.data, name: e.target.value },
-                })
-              }
-              style={{ width: 300 }}
-            />
-            <CheckCircleOutlined
-              style={{ fontSize: 20 }}
-              onClick={handleConfirm}
-            />
-          </Space>
+        <div
+          style={{ display: "flex", flexDirection: "column", height: "100%" }}
+        >
+          <Input
+            value={selectedNode.data.name}
+            onChange={(e) =>
+              setSelectedNode({
+                ...selectedNode,
+                data: { ...selectedNode.data, name: e.target.value },
+              })
+            }
+            style={{ width: "100%", marginBottom: 16 }}
+          />
           <TextArea
             value={selectedNode.data.context || ""}
             onChange={(e) =>
@@ -150,8 +156,7 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
                 data: { ...selectedNode.data, context: e.target.value },
               })
             }
-            rows={4}
-            style={{ width: "100%", marginTop: 16 }}
+            style={{ flex: 1 }}
           />
         </div>
       )}
