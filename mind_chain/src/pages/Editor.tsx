@@ -214,7 +214,7 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges, noteId, noteName, fetchNo
           阻塞任务列表
         </button>
         <button onClick={handleHistoryClick}>
-          <BranchesOutlined />
+          <BranchesOutlined style={{ fontSize: 20 }}/>
         </button>
       </div>
 
