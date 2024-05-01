@@ -248,7 +248,7 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges, noteId, noteName, fetchNo
 
       {!showContext && (
         <List
-          size="small"
+          // size="small"
           bordered
           dataSource={taskList}
           renderItem={(item: any) => (
@@ -258,18 +258,18 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges, noteId, noteName, fetchNo
                   {isCurrentTaskList && item.nodeData && (
                     <>
                       <CheckCircleOutlined
-                        style={{ fontSize: 20 }}
+                        style={{ fontSize: 22 }}
                         onClick={() => handleFinishNode(item.nodeData)}
                       />
                       <CopyOutlined
-                        style={{ fontSize: 20 }}
+                        style={{ fontSize: 22 }}
                         onClick={() => handleSelectNode(item.nodeData.id)}
                       />
                     </>
                   )}
                   {!isCurrentTaskList && item.nodeData && (
                     <SmileOutlined
-                      style={{ fontSize: 20 }}
+                      style={{ fontSize: 22 }}
                       onClick={() => handleUnblockNode(item.nodeData)}
                     />
                   )}

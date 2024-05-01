@@ -3,7 +3,7 @@ import ReactFlow, { Controls, Background, Panel } from "reactflow";
 import "reactflow/dist/style.css";
 import { LayoutAlgorithm } from "../utils/Other/LayoutAlgorithm";
 import useCopyPaste from "../utils/Other/useCopyPaste";
-import { CheckSquareOutlined } from "@ant-design/icons";
+import { CheckSquareOutlined, DeploymentUnitOutlined } from "@ant-design/icons";
 import { saveAndUpdateNote } from "../utils/ConvertStatus/SaveAndUpdateNote";
 
 function FlowButton({
@@ -48,11 +48,32 @@ function FlowButton({
         <Background />
         <Controls />
         <Panel position="top-right">
-          <button onClick={handleLayout}>重新排布</button>
-          <CheckSquareOutlined
-            style={{ fontSize: 20, marginLeft: 8 }}
-            onClick={handleSaveAndUpdate}
-          />
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <div
+              style={{
+                width: 50,
+                display: "flex",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+              onClick={handleLayout}
+            >
+              <DeploymentUnitOutlined style={{ fontSize: 25 }} />
+            </div>
+            <div
+              style={{
+                width: 50,
+                display: "flex",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+            >
+              <CheckSquareOutlined
+                style={{ fontSize: 25 }}
+                onClick={handleSaveAndUpdate}
+              />
+            </div>
+          </div>
         </Panel>
       </ReactFlow>
     </div>
