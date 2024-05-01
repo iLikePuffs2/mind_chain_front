@@ -13,7 +13,7 @@ import SidebarDrawer from "../component/SidebarDrawer";
 import AddNotePop from "../component/Pop/AddNotePop";
 import "../css/Flow.css";
 import { Note } from "../model/note";
-import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
+import { LayoutAlgorithm } from "../utils/Other/LayoutAlgorithm";
 import CustomNode from "../component/CustomNode";
 import { createContext } from "react";
 import Editor from "../pages/Editor";
@@ -355,7 +355,13 @@ const Flow = () => {
             />
           </div>
         </ReactFlowProvider>
-        <Editor nodes={nodes} edges={edges} />
+        <Editor
+          nodes={nodes}
+          edges={edges}
+          noteId={selectedNote?.id || ""}
+          noteName={selectedNote?.name || ""}
+          fetchNoteDetail={fetchNoteDetail}
+        />
         <SidebarDrawer
           open={open}
           onClose={onClose}

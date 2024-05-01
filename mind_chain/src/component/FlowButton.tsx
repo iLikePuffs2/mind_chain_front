@@ -1,8 +1,8 @@
 import React from "react";
 import ReactFlow, { Controls, Background, Panel } from "reactflow";
 import "reactflow/dist/style.css";
-import { LayoutAlgorithm } from "../utils/LayoutAlgorithm";
-import useCopyPaste from "../utils/useCopyPaste";
+import { LayoutAlgorithm } from "../utils/Other/LayoutAlgorithm";
+import useCopyPaste from "../utils/Other/useCopyPaste";
 import { CheckSquareOutlined } from "@ant-design/icons";
 import { saveAndUpdateNote } from "../utils/ConvertStatus/SaveAndUpdateNote";
 

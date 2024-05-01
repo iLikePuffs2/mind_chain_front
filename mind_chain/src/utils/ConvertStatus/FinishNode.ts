@@ -1,6 +1,6 @@
 import { Node, Edge } from "reactflow";
 import { findNodesUnderConvergenceNode } from "./CalculateStatus";
-import { findConvergenceNode } from "../AddNode";
+import { findConvergenceNode } from "../Other/AddNode";
 import { convertStatus } from "./ConvertStatus";
 import { getDirectParentNodes } from "./CalculateStatus";
 

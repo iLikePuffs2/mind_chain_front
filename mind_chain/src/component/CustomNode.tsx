@@ -15,7 +15,7 @@ import {
   SmileOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Menu, Space, Tooltip, DatePicker, Popover } from "antd";
-import { addSiblingNode, addChildNode } from "../utils/AddNode";
+import { addSiblingNode, addChildNode } from "../utils/Other/AddNode";
 import { blockNode } from "../utils/ConvertStatus/BlockNode";
 import { NodesEdgesContext } from "../pages/Flow";
 import AddBlockReason from "./Pop/AddBlockReason";

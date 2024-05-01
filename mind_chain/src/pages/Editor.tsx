@@ -1,23 +1,29 @@
 import React, { useState, useContext, useEffect } from "react";
-import { List, Typography, Space, Input } from "antd";
+import { List, Typography, Space, Input, Modal } from "antd";
 import {
   CheckCircleOutlined,
   SmileOutlined,
   CopyOutlined,
+  BranchesOutlined,
 } from "@ant-design/icons";
 import { getCurrentTaskList } from "../utils/Editor/CurrentTaskList";
 import { getBlockedTaskList } from "../utils/Editor/BlockedTaskList";
 import { NodesEdgesContext } from "../pages/Flow";
 import { FinishNode } from "../utils/ConvertStatus/FinishNode";
 import { unblock } from "../utils/ConvertStatus/Unblock";
+import { getHistoryList } from "../utils/Histroy/getHistoryList";
+import { recoverHistory } from "../utils/Histroy/recoverHistory";
 const { TextArea } = Input;
 
 interface EditorProps {
   nodes: any[];
   edges: any[];
+  noteId: string;
+  noteName: string;
+  fetchNoteDetail: (userId: string, noteId?: string) => Promise<{ note: any; nodeList: any[] } | null>;
 }
 
-const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
+const Editor: React.FC<EditorProps> = ({ nodes, edges, noteId, noteName, fetchNoteDetail }) => {
   const {
     nodes: contextNodes,
     edges: contextEdges,
@@ -30,6 +36,10 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
   const [isCurrentTaskList, setIsCurrentTaskList] = useState(true);
   const [selectedNode, setSelectedNode] = useState(null);
   const [showContext, setShowContext] = useState(false);
+  const [historyVisible, setHistoryVisible] = useState(false);
+  const [historyList, setHistoryList] = useState([]);
+
+  const userId = sessionStorage.getItem("userId");
 
   useEffect(() => {
     const selected = contextNodes.find((node) => node.selected);
@@ -117,6 +127,73 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
     setNodes(updatedNodes);
   };
 
+  const handleHistoryClick = async () => {
+    const response = await getHistoryList(userId, noteName);
+    if (response && response.code === 0) {
+      setHistoryList(response.data);
+      setHistoryVisible(true);
+    }
+  };
+
+  const handleHistoryRecover = async (noteId) => {
+    const response = await recoverHistory(userId, noteName, noteId);
+    if (response && response.code === 0) {
+      setHistoryVisible(false);
+      // 刷新笔记内容
+      const noteDetail = await fetchNoteDetail(userId, noteId);
+      if (noteDetail) {
+        const { note, nodeList } = noteDetail;
+        // 更新节点和边的信息
+        const initialNodes = [
+          {
+            id: "0",
+            data: {
+              label: note ? note.name : "未命名笔记",
+              isRoot: true,
+              id: 0,
+              level: 0,
+            },
+            position: { x: 0, y: 0 },
+            type: "customNode",
+          },
+          ...nodeList.map((node) => ({
+            id: node.id.toString(),
+            data: {
+              label: node.name,
+              ...node,
+              blockedTime: node.blockedTime ? new Date(node.blockedTime) : null,
+            },
+            position: { x: 0, y: 0 },
+            type: "customNode",
+          })),
+        ];
+        setNodes(initialNodes);
+        setEdges(
+          nodeList.flatMap((node) => {
+            const edges = [];
+            if (node.parentId !== null) {
+              const parentIds = node.parentId.split(",");
+              parentIds.forEach((parentId) => {
+                edges.push({
+                  id: `${parentId}-${node.id}`,
+                  source: parentId,
+                  target: node.id.toString(),
+                });
+              });
+            } else if (node.id !== "0") {
+              edges.push({
+                id: `0-${node.id}`,
+                source: "0",
+                target: node.id.toString(),
+              });
+            }
+            return edges;
+          })
+        );
+      }
+    }
+  };
+
   return (
     <div className="text-container">
       <div className="button-container">
@@ -135,6 +212,9 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
           }}
         >
           阻塞任务列表
+        </button>
+        <button onClick={handleHistoryClick}>
+          <BranchesOutlined />
         </button>
       </div>
 
@@ -203,6 +283,28 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges }) => {
           style={{ marginTop: 16 }}
         />
       )}
+
+      <Modal
+        title="历史版本"
+        visible={historyVisible}
+        onCancel={() => setHistoryVisible(false)}
+        footer={null}
+      >
+        <List
+          dataSource={historyList}
+          renderItem={(item) => (
+            <List.Item
+              actions={[
+                <button onClick={() => handleHistoryRecover(item.id)}>
+                  恢复
+                </button>,
+              ]}
+            >
+              {item.createdTime}
+            </List.Item>
+          )}
+        />
+      </Modal>
     </div>
   );
 };
