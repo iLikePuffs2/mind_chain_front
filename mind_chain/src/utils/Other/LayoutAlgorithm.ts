@@ -52,17 +52,15 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
   // 执行布局算法(计算节点的位置，不计算边的)
   const layoutedRoot = layout(hierarchyData);
 
-  // 修改节点的一系列状态
-  convertStatus(nodes, edges);
-
   // 将布局后的节点转换为带有位置信息的节点数组
   const layoutedNodes = layoutedRoot.descendants().map((node) => {
     return {
       ...node.data,
       position: { x: node.x, y: node.y },
-      style: node.data.style
-        ? { backgroundColor: node.data.style.backgroundColor }
-        : {},
+      style: {
+        ...node.data.style,
+        backgroundColor: node.data.style?.backgroundColor,
+      },
     };
   });
 
@@ -70,6 +68,9 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
   const uniqueLayoutedNodes = [
     ...new Map(layoutedNodes.map((node) => [node.id, node])).values(),
   ];
+
+  // 修改节点的一系列状态
+  convertStatus(uniqueLayoutedNodes, edges);
 
   return { nodes: uniqueLayoutedNodes, edges };
 };

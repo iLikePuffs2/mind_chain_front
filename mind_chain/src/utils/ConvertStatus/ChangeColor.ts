@@ -3,7 +3,7 @@ export function changeColor(nodes: Node[], edges: Edge[]) {
   nodes.forEach((node) => {
     const { status, details } = node.data;
     let color;
-  
+
     const detailsArray =
       details === null || details === ""
         ? []
@@ -12,7 +12,7 @@ export function changeColor(nodes: Node[], edges: Edge[]) {
         : Array.isArray(details)
         ? details.map(Number)
         : [Number(details)];
-  
+
     if (status === 1) {
       // #99e699是浅绿色,#b3d1ff是浅蓝色
       color =
@@ -28,9 +28,12 @@ export function changeColor(nodes: Node[], edges: Edge[]) {
       );
       color = containsSpecialReasons ? "#ff6666" : "#fad1d1";
     }
-  
+
     // 将修改后的颜色赋值给节点的style属性(与data同级)
-    node.style = { backgroundColor: color };
+    node.style = {
+      ...node.style,
+      backgroundColor: color,
+    };
   });
 
   return nodes;

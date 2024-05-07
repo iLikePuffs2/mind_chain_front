@@ -22,7 +22,7 @@ import AddBlockReason from "./Pop/AddBlockReason";
 import { unblock } from "../utils/ConvertStatus/Unblock";
 import { FinishNode } from "../utils/ConvertStatus/FinishNode";
 
-const CustomNode = ({ data, isConnectable, selected }) => {
+const CustomNode = ({ data, isConnectable, selected, style }) => {
   const { label, isRoot, blockedReason, blockedTime } = data;
   const { nodes, setNodes, edges, setEdges, finishedMap, setFinishedMap } =
     useContext(NodesEdgesContext);
@@ -113,7 +113,7 @@ const CustomNode = ({ data, isConnectable, selected }) => {
   };
 
   return (
-    <div className="react-flow__node-group">
+    <div className="react-flow__node-group" style={style}>
       <NodeToolbar isVisible={selected} position={Position.Right}>
         <Space size="middle">
           <Dropdown overlay={plusMenu} placement="top" trigger={["click"]}>
@@ -158,13 +158,13 @@ const CustomNode = ({ data, isConnectable, selected }) => {
           isConnectable={isConnectable}
         />
       )}
-      <Tooltip
-        title={getTooltipTitle()}
-        placement="top"
-        overlayStyle={{ zIndex: 1000 }}
-      >
-        <div>{label}</div>
-      </Tooltip>
+        <Tooltip
+          title={getTooltipTitle()}
+          placement="top"
+          overlayStyle={{ zIndex: 1000 }}
+        >
+          <div>{label}</div>
+        </Tooltip>
 
       <Handle
         type="source"

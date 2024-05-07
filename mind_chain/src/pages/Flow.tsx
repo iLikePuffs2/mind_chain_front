@@ -31,7 +31,11 @@ export const NodesEdgesContext = createContext({
 });
 
 const nodeTypes = {
-  customNode: (props) => <CustomNode {...props} />,
+  customNode: (props) => {
+    const { nodes } = useContext(NodesEdgesContext);
+    const nodeStyle = nodes.find((node) => node.id === props.id)?.style;
+    return <CustomNode {...props} style={nodeStyle} />;
+  },
 };
 
 const Flow = () => {
