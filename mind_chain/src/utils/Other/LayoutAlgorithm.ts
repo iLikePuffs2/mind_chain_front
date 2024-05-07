@@ -2,6 +2,7 @@ import { type Node, type Edge } from "reactflow";
 import { hierarchy, tree } from "d3-hierarchy";
 import { type HierarchyPointNode } from "d3-hierarchy";
 import { convertStatus } from "../ConvertStatus/ConvertStatus";
+import { adjustNodePositionX } from "../ConvertStatus/AdjustNodePositionX";
 
 const getPosition = (x: number, y: number) => ({ x, y });
 
@@ -71,6 +72,8 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
 
   // 修改节点的一系列状态
   convertStatus(uniqueLayoutedNodes, edges);
+
+  adjustNodePositionX(uniqueLayoutedNodes);
 
   return { nodes: uniqueLayoutedNodes, edges };
 };

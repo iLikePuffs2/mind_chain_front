@@ -113,7 +113,7 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
   };
 
   return (
-    <div className="react-flow__node-group" style={style}>
+    <div className="node" style={style}>
       <NodeToolbar isVisible={selected} position={Position.Right}>
         <Space size="middle">
           <Dropdown overlay={plusMenu} placement="top" trigger={["click"]}>

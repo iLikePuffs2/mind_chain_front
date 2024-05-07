@@ -1,0 +1,8 @@
+.node {
+    border: 1px solid #000; /* 添加黑色边框线 */
+    display: flex; /* 启用 flexbox 布局 */
+    justify-content: center; /* 水平居中 */
+    align-items: center; /* 垂直居中 */
+    border-radius: 3px; /* 添加圆角半径 */
+    
+  }

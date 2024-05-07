@@ -17,6 +17,7 @@ import { LayoutAlgorithm } from "../utils/Other/LayoutAlgorithm";
 import CustomNode from "../component/CustomNode";
 import { createContext } from "react";
 import Editor from "../pages/Editor";
+import '../css/CustomNode.css'
 
 const initialNodes = [];
 const initialEdges = [];
