@@ -3,6 +3,7 @@ import { hierarchy, tree } from "d3-hierarchy";
 import { type HierarchyPointNode } from "d3-hierarchy";
 import { convertStatus } from "../ConvertStatus/ConvertStatus";
 import { adjustNodePositionX } from "../ConvertStatus/AdjustNodePositionX";
+import { adjustNodePositionByPriority } from "../ConvertStatus/AdjustNodePositionByPriority";
 
 const getPosition = (x: number, y: number) => ({ x, y });
 
@@ -73,7 +74,10 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
   // 修改节点的一系列状态
   convertStatus(uniqueLayoutedNodes, edges);
 
+  // 让大小不一的节点依旧保持合理的横坐标
   adjustNodePositionX(uniqueLayoutedNodes);
+  // 根据priority再调整横坐标
+  const adjustedNodes = adjustNodePositionByPriority(uniqueLayoutedNodes, edges);
 
-  return { nodes: uniqueLayoutedNodes, edges };
+  return { nodes: adjustedNodes, edges };
 };

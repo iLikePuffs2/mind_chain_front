@@ -24,5 +24,16 @@ export const convertStatus = (nodes: Node[], edges: Edge[]) => {
   // 4.修改全部节点的颜色
   changeColor(nodes, edges);
 
+  // 5.修改节点的priority值
+  nodes.forEach((node) => {
+    if (!node.data.priority || node.data.priority <= 2) {
+      if (node.data.status === 1) {
+        node.data.priority = 2;
+      } else if (node.data.status === 2) {
+        node.data.priority = 1;
+      }
+    }
+  });
+
   return nodes;
 };
