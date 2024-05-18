@@ -8,9 +8,13 @@ export const adjustNodePositionByPriority = (nodes: Node[], edges: Edge[]) => {
   // 对一级节点进行深拷贝
   const levelOneNodesCopy = JSON.parse(JSON.stringify(levelOneNodes));
   // 根据priority值对拷贝后的一级节点进行排序
-  const sortedLevelOneNodes = levelOneNodesCopy.sort(
-    (a, b) => a.data.priority - b.data.priority
-  );
+  const sortedLevelOneNodes = levelOneNodesCopy.sort((a, b) => {
+    if (a.data.status !== b.data.status) {
+      return a.data.status - b.data.status;
+    } else {
+      return b.data.priority - a.data.priority;
+    }
+  });
 
   // Map用于记录每个一级节点的x值变化量
   const xDiffMap = new Map<string, number>();
@@ -65,9 +69,13 @@ export const adjustNodePositionByPriority = (nodes: Node[], edges: Edge[]) => {
       .map((edge) => nodes.find((n) => n.id === edge.target))
       .filter((node) => node !== undefined);
     // 根据子节点的priority值对子节点进行排序
-    const sortedChildNodes = [...childNodes].sort(
-      (a, b) => a.data.priority - b.data.priority
-    );
+    const sortedChildNodes = [...childNodes].sort((a, b) => {
+      if (a.data.status !== b.data.status) {
+        return a.data.status - b.data.status;
+      } else {
+        return b.data.priority - a.data.priority;
+      }
+    });
     // 对排序后的子节点进行遍历
     sortedChildNodes.forEach((childNode, index) => {
       // 根据index值重新设置子节点的x坐标
