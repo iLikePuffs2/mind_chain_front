@@ -2,19 +2,11 @@ import { calculateNodeStatusAndDetails } from "./CalculateStatus";
 import { changeColor } from "./ChangeColor";
 import { resizeNode } from "./ResizeNode";
 import { setPriority } from "./SetPriority";
+import { setParentId } from "./SetParentId";
 
 export const convertStatus = (nodes: Node[], edges: Edge[]) => {
   // 1.修改全部节点的parentId属性
-  nodes.forEach((node) => {
-    if (node.id !== "0") {
-      const parentEdges = edges.filter((edge) => edge.target === node.id);
-      if (parentEdges.length > 0) {
-        node.data.parentId = parentEdges.map((edge) => edge.source).join(",");
-      } else {
-        node.data.parentId = "0";
-      }
-    }
-  });
+  setParentId(nodes, edges);
 
   // 2.修改节点的status和details值
   calculateNodeStatusAndDetails(nodes, edges);
@@ -25,8 +17,8 @@ export const convertStatus = (nodes: Node[], edges: Edge[]) => {
   // 4.修改全部节点的颜色
   changeColor(nodes, edges);
 
-  // 5.修改节点的priority值
-  setPriority(nodes);
+  // 5.对节点的priority值进行初始化和整理
+  setPriority(nodes, edges);
 
   return nodes;
 };

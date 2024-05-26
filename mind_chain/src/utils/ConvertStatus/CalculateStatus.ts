@@ -148,38 +148,6 @@ export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
 }
 
 /**
- * 广度优先遍历
- *
- * @param startNode 起始节点
- * @param nodes 节点列表
- * @param edges 边列表
- * @param callback 回调函数,用于处理每个节点
- */
-function bfs(
-  startNode: Node,
-  nodes: Node[],
-  edges: Edge[],
-  callback: (node: Node) => void
-) {
-  const queue: Node[] = [startNode];
-  const visited = new Set<string>();
-
-  while (queue.length > 0) {
-    const node = queue.shift()!;
-    visited.add(node.id);
-
-    callback(node);
-
-    const parentNodes = getDirectParentNodes(node.id, nodes, edges);
-    parentNodes.forEach((parentNode) => {
-      if (!visited.has(parentNode.id)) {
-        queue.push(parentNode);
-      }
-    });
-  }
-}
-
-/**
  * 获取节点的直接父节点
  *
  * @param nodeId 节点ID
@@ -210,7 +178,7 @@ export function getDirectParentNodes(
  * @param edges 边列表
  * @returns 直接子节点列表
  */
-function getDirectChildNodes(
+export function getDirectChildNodes(
   nodeId: string,
   nodes: Node[],
   edges: Edge[]
@@ -337,7 +305,7 @@ function findPathsAbove(
 }
 
 /**
- * 找到以指定收敛节点为起点向下的所有路径中经过的所有节点
+ * 找到以指定节点为起点向下的所有路径中经过的所有节点
  * @param convergenceNode 指定收敛节点
  * @param nodes 节点列表
  * @param edges 边列表
@@ -440,29 +408,4 @@ function updateNodeStatusAndDetails(
       }
     });
   });
-}
-
-/**
- * 找到以指定节点为起点向下的所有路径中经过的所有节点
- *
- * @param node 指定节点
- * @param nodes 节点列表
- * @param edges 边列表
- * @returns 所有向下路径经过的节点ID
- */
-function findNodesUnderNode(
-  node: Node,
-  nodes: Node[],
-  edges: Edge[]
-): string[] {
-  const paths = findPathsBelow(node.id, nodes, edges);
-  const nodesSet = new Set<string>();
-
-  paths.forEach((path) => {
-    path.forEach((node) => {
-      if (node !== undefined) nodesSet.add(node.id);
-    });
-  });
-
-  return Array.from(nodesSet);
 }

@@ -51,37 +51,5 @@ export const adjustNodePositionByPriority = (nodes: Node[], edges: Edge[]) => {
     });
   });
 
-  // 找到所有有多个直接子节点的非根节点
-  const convergenceNodes = nodes.filter((node) => {
-    if (node.id === "0") {
-      return false;
-    }
-    const childEdges = edges.filter((edge) => edge.source === node.id);
-    return childEdges.length > 1;
-  });
-
-  // 对每个有多个直接子节点的非根节点进行处理
-  convergenceNodes.forEach((node) => {
-    // 找到当前节点的所有直接子边
-    const childEdges = edges.filter((edge) => edge.source === node.id);
-    // 根据子边的target找到对应的子节点对象
-    const childNodes = childEdges
-      .map((edge) => nodes.find((n) => n.id === edge.target))
-      .filter((node) => node !== undefined);
-    // 根据子节点的priority值对子节点进行排序
-    const sortedChildNodes = [...childNodes].sort((a, b) => {
-      if (a.data.status !== b.data.status) {
-        return a.data.status - b.data.status;
-      } else {
-        return b.data.priority - a.data.priority;
-      }
-    });
-    // 对排序后的子节点进行遍历
-    sortedChildNodes.forEach((childNode, index) => {
-      // 根据index值重新设置子节点的x坐标
-      childNode.position.x = childNodes[index].position.x;
-    });
-  });
-
   return nodes;
 };
