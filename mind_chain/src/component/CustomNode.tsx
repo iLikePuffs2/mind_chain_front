@@ -84,13 +84,13 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
 
   const columnWidthMenu = (
     <Menu>
-      <Menu.Item key="1" onClick={() => increasePriority(data, nodes, edges)}>
+      <Menu.Item key="1" onClick={() => decreasePriority(data, nodes, edges)}>
         <Space>
           <LeftOutlined />
           <span>提高优先级</span>
         </Space>
       </Menu.Item>
-      <Menu.Item key="2" onClick={() => decreasePriority(data, nodes, edges)}>
+      <Menu.Item key="2" onClick={() => increasePriority(data, nodes, edges)}>
         <Space>
           <RightOutlined />
           <span>降低优先级</span>
