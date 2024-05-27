@@ -30,15 +30,8 @@ export const adjustNodePositionByPriority = (nodes: Node[], edges: Edge[]) => {
 
         // 判断当前节点是否为"多父节点"（拥有多个直接子节点）
         if (childNodes.length > 1) {
-          // 过滤出 node.data.status === 1 的可执行节点
-          const executableNodes = childNodes.filter((n) => n.data.status === 1);
-          // 对可执行节点进行位置交换
-          adjustPositionsByPriority(nodes, edges, executableNodes);
-
-          // 过滤出 node.data.status === 2 的被阻塞节点
-          const blockedNodes = childNodes.filter((n) => n.data.status === 2);
-          // 对被阻塞节点进行位置交换
-          adjustPositionsByPriority(nodes, edges, blockedNodes);
+          // 对子节点进行位置交换
+          adjustPositionsByPriorityAndStatus(nodes, edges, childNodes);
         }
 
         // 将子节点压入队列，用于下一层的处理
@@ -84,19 +77,24 @@ export function findNodesBetween(
 }
 
 /**
- * 根据优先级调整节点位置
+ * 根据优先级和状态调整节点位置
  * @param nodes 所有节点的数组
  * @param childNodes 要调整位置的子节点数组
  */
-const adjustPositionsByPriority = (
+const adjustPositionsByPriorityAndStatus = (
   nodes: Node[],
   edges: Edge[],
   childNodes: Node[]
 ) => {
-  // 按照优先级对子节点进行排序(深拷贝防止出现奇怪错误)
-  const sortedNodes = JSON.parse(JSON.stringify(childNodes)).sort(
-    (a, b) => a.data.priority - b.data.priority
-  );
+  // 按照状态和优先级对子节点进行排序(深拷贝防止出现奇怪错误)
+  const sortedNodes = JSON.parse(JSON.stringify(childNodes)).sort((a, b) => {
+    if (a.data.status === b.data.status) {
+      return a.data.priority - b.data.priority;
+    } else {
+      return a.data.status - b.data.status;
+    }
+  });
+
   // 创建一个 Map，用于记录每个节点的 x 值变化量
   const xDiffMap = new Map<string, number>();
 
