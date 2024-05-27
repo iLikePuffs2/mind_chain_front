@@ -21,7 +21,10 @@ import { NodesEdgesContext } from "../pages/Flow";
 import AddBlockReason from "./Pop/AddBlockReason";
 import { unblock } from "../utils/ConvertStatus/Unblock";
 import { FinishNode } from "../utils/ConvertStatus/FinishNode";
-import { increasePriority, decreasePriority } from "../utils/ConvertStatus/ChangePriority";
+import {
+  increasePriority,
+  decreasePriority,
+} from "../utils/ConvertStatus/ChangePriority";
 
 const CustomNode = ({ data, isConnectable, selected, style }) => {
   const { label, isRoot, blockedReason, blockedTime } = data;
@@ -81,13 +84,13 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
 
   const columnWidthMenu = (
     <Menu>
-      <Menu.Item key="1" onClick={() => increasePriority(data)}>
+      <Menu.Item key="1" onClick={() => increasePriority(data, nodes, edges)}>
         <Space>
           <LeftOutlined />
           <span>提高优先级</span>
         </Space>
       </Menu.Item>
-      <Menu.Item key="2" onClick={() => decreasePriority(data)}>
+      <Menu.Item key="2" onClick={() => decreasePriority(data, nodes, edges)}>
         <Space>
           <RightOutlined />
           <span>降低优先级</span>
@@ -165,13 +168,13 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
           isConnectable={isConnectable}
         />
       )}
-        <Tooltip
-          title={getTooltipTitle()}
-          placement="top"
-          overlayStyle={{ zIndex: 1000 }}
-        >
-          <div>{label}</div>
-        </Tooltip>
+      <Tooltip
+        title={getTooltipTitle()}
+        placement="top"
+        overlayStyle={{ zIndex: 1000 }}
+      >
+        <div>{label}</div>
+      </Tooltip>
 
       <Handle
         type="source"
