@@ -36,7 +36,7 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
 
   const plusMenu = (
     <Menu>
-      {!isRoot && (
+      {!isRoot && data.level !== 1 && (
         <Menu.Item
           key="1"
           onClick={() => addSiblingNode(data, nodes, setNodes, edges, setEdges)}
