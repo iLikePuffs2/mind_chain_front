@@ -9,45 +9,45 @@ import { getDirectChildNodes } from "./CalculateStatus";
  * @returns 调整后的节点数组
  */
 export const adjustNodePositionByPriority = (nodes: Node[], edges: Edge[]) => {
-  const visited = new Set<string>();
-
-  /**
-   * 递归遍历节点
-   * @param node 当前遍历的节点
-   */
-  const traverse = (node: Node) => {
-    // 将当前节点标记为已访问
-    visited.add(node.id);
-
-    // 获取当前节点的直接子节点
-    const childNodes = getDirectChildNodes(node.id, nodes, edges);
-
-    // 判断当前节点是否为"多父节点"（拥有多个直接子节点）
-    if (childNodes.length > 1) {
-      // 过滤出 node.data.status === 1 的可执行节点
-      const executableNodes = childNodes.filter((n) => n.data.status === 1);
-      // 对可执行节点进行位置交换
-      adjustPositionsByPriority(nodes, edges, executableNodes);
-
-      // 过滤出 node.data.status === 2 的被阻塞节点
-      const blockedNodes = childNodes.filter((n) => n.data.status === 2);
-      // 对被阻塞节点进行位置交换
-      adjustPositionsByPriority(nodes, edges, blockedNodes);
-    }
-
-    // 递归处理子节点
-    childNodes.forEach((child) => {
-      // 如果子节点还没有被访问过，则递归遍历该子节点
-      if (!visited.has(child.id)) {
-        traverse(child);
-      }
-    });
-  };
-
   // 找到根节点
   const rootNode = nodes.find((node) => node.id === "0");
-  // 从根节点开始遍历
-  if (rootNode) traverse(rootNode);
+
+  if (rootNode) {
+    // 定义队列，并将根节点压入队列
+    const queue: Node[] = [rootNode];
+
+    // 每轮记录一层元素
+    while (queue.length > 0) {
+      // 记录这一层元素的个数，作为循环次数
+      const levelSize = queue.length;
+
+      // 处理这一层的全部元素
+      for (let i = 0; i < levelSize; i++) {
+        const node = queue.shift();
+
+        // 获取当前节点的直接子节点
+        const childNodes = getDirectChildNodes(node.id, nodes, edges);
+
+        // 判断当前节点是否为"多父节点"（拥有多个直接子节点）
+        if (childNodes.length > 1) {
+          // 过滤出 node.data.status === 1 的可执行节点
+          const executableNodes = childNodes.filter((n) => n.data.status === 1);
+          // 对可执行节点进行位置交换
+          adjustPositionsByPriority(nodes, edges, executableNodes);
+
+          // 过滤出 node.data.status === 2 的被阻塞节点
+          const blockedNodes = childNodes.filter((n) => n.data.status === 2);
+          // 对被阻塞节点进行位置交换
+          adjustPositionsByPriority(nodes, edges, blockedNodes);
+        }
+
+        // 将子节点压入队列，用于下一层的处理
+        childNodes.forEach((child) => {
+          queue.push(child);
+        });
+      }
+    }
+  }
 
   // 返回调整后的节点数组
   return nodes;
@@ -91,10 +91,10 @@ export function findNodesBetween(
 const adjustPositionsByPriority = (
   nodes: Node[],
   edges: Edge[],
-  childNodes: Node[],
+  childNodes: Node[]
 ) => {
-  // 按照优先级对子节点进行排序
-  const sortedNodes = [...childNodes].sort(
+  // 按照优先级对子节点进行排序(深拷贝防止出现奇怪错误)
+  const sortedNodes = JSON.parse(JSON.stringify(childNodes)).sort(
     (a, b) => a.data.priority - b.data.priority
   );
   // 创建一个 Map，用于记录每个节点的 x 值变化量
@@ -111,7 +111,12 @@ const adjustPositionsByPriority = (
   });
 
   // 更新 nodes 数组中的节点位置
-  nodes = nodes.map((n) => sortedNodes.find((sn) => sn.id === n.id) || n);
+  nodes.forEach((n) => {
+    const sortedNode = sortedNodes.find((sn) => sn.id === n.id);
+    if (sortedNode) {
+      n.position.x = sortedNode.position.x;
+    }
+  });
 
   // 处理 x 值变化不为 0 的节点
   sortedNodes.forEach((node) => {
