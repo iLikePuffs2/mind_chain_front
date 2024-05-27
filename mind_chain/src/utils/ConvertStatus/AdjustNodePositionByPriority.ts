@@ -1,6 +1,4 @@
 import { findNodesUnderConvergenceNode } from "./CalculateStatus";
-import { findConvergenceNode } from "../Other/AddNode";
-import { getDirectChildNodes } from "./CalculateStatus";
 
 /**
  * 根据优先级调整节点位置（主函数）
@@ -14,29 +12,34 @@ export const adjustNodePositionByPriority = (nodes: Node[], edges: Edge[]) => {
 
   if (rootNode) {
     // 定义队列，并将根节点压入队列
-    const queue: Node[] = [rootNode];
-
+    let queue: Set<Node> = new Set([rootNode]);
+  
     // 每轮记录一层元素
-    while (queue.length > 0) {
+    while (queue.size > 0) {
+      // 将队列里的越级节点剔除(根据纵坐标处理)
+      const minY = Math.min(...Array.from(queue).map((node) => node.position.y));
+      queue = new Set(Array.from(queue).filter((node) => node.position.y === minY));
+  
       // 记录这一层元素的个数，作为循环次数
-      const levelSize = queue.length;
-
+      const levelSize = queue.size;
+  
       // 处理这一层的全部元素
       for (let i = 0; i < levelSize; i++) {
-        const node = queue.shift();
-
+        const node = Array.from(queue)[0];
+        queue.delete(node);
+  
         // 获取当前节点的直接子节点
         const childNodes = getDirectChildNodes(node.id, nodes, edges);
-
+  
         // 判断当前节点是否为"多父节点"（拥有多个直接子节点）
         if (childNodes.length > 1) {
           // 对子节点进行位置交换
           adjustPositionsByPriorityAndStatus(nodes, edges, childNodes);
         }
-
+  
         // 将子节点压入队列，用于下一层的处理
         childNodes.forEach((child) => {
-          queue.push(child);
+          queue.add(child);
         });
       }
     }
@@ -122,25 +125,25 @@ const adjustPositionsByPriorityAndStatus = (
     const xDiff = xDiffMap.get(node.id);
     // 如果 x 值变化量不为 0
     if (xDiff !== 0) {
-      // 找到当前节点的非同级收敛节点
-      const convergenceNode = findConvergenceNode(node, nodes, edges);
+      // 找到当前节点的低级收敛节点
+      const convergenceNode = findLowerConvergenceNode(node, nodes, edges);
       let affectedNodes: Node[];
 
-      // 如果找到了非同级收敛节点
+      // 如果找到了低级收敛节点
       if (convergenceNode) {
         // 找到当前节点到收敛节点之间的所有节点
         affectedNodes = findNodesBetween(node, convergenceNode, nodes, edges);
         affectedNodes.shift(); // 去除当前节点
-        affectedNodes.pop(); // 去除收敛节点
       } else {
-        // 如果没有找到非同级收敛节点
+        // 如果没有找到低级收敛节点
         // 找到以当前节点为起点向下的所有路径中经过的所有节点
         const affectedNodeIds = findNodesUnderConvergenceNode(
           node,
           nodes,
           edges
         );
-        affectedNodeIds.delete(node.id); // 去除当前节点
+        // 去除当前节点(因为在上面已经移动了当前节点)
+        affectedNodeIds.delete(node.id);
         // 根据节点 ID 获取对应的节点对象
         affectedNodes = Array.from(affectedNodeIds)
           .map((id) => nodes.find((n) => n.id === id))
@@ -154,3 +157,82 @@ const adjustPositionsByPriorityAndStatus = (
     }
   });
 };
+
+// 找到当前节点向下路径中的低级收敛节点
+export const findLowerConvergenceNode = (currentNode, nodes, edges) => {
+  const visited = new Set();
+  let convergenceNode = null;
+
+  const currentNodeObj = nodes.find(
+    (node) => String(node.data.id) === String(currentNode.id)
+  );
+
+  // 判断是否有且仅有一条以当前节点为source的线段，且target对应的节点的level<当前节点的level
+  const edgesFromCurrentNode = edges.filter(
+    (edge) => edge.source === currentNodeObj.id
+  );
+  if (edgesFromCurrentNode.length === 1) {
+    const targetNode = nodes.find(
+      (node) => node.id === edgesFromCurrentNode[0].target
+    );
+    if (targetNode && targetNode.data.level < currentNodeObj.data.level) {
+      convergenceNode = targetNode;
+      return convergenceNode;
+    }
+  }
+
+  const dfs = (nodeId) => {
+    visited.add(nodeId);
+
+    const childEdges = edges.filter((edge) => edge.source === nodeId);
+
+    for (const childEdge of childEdges) {
+      const childNodeId = childEdge.target;
+      const childNode = nodes.find((node) => node.id === childNodeId);
+
+      if (!visited.has(childNodeId)) {
+        if (
+          childNode.data.level < currentNodeObj.data.level &&
+          childNodeId !== currentNodeObj.id
+        ) {
+          convergenceNode = childNode;
+          return;
+        }
+        dfs(childNodeId);
+        if (convergenceNode) {
+          return;
+        }
+      }
+    }
+  };
+
+  dfs(currentNodeObj.id);
+  return convergenceNode;
+};
+
+/**
+ * 获取节点的直接子节点(不考虑level,考虑位置高度,适用于层级遍历)
+ *
+ * @param nodeId 节点ID
+ * @param nodes 节点列表
+ * @param edges 边列表
+ * @returns 直接子节点列表
+ */
+export function getDirectChildNodes(
+  nodeId: string,
+  nodes: Node[],
+  edges: Edge[]
+): Node[] {
+  const childIds = edges
+    .filter((edge) => edge.source === nodeId)
+    .map((edge) => edge.target);
+
+  // 纵坐标相同，且在上面的节点，才是一批层序遍历的节点
+  const minY = Math.min(...nodes.filter((node) => childIds.includes(node.id)).map((node) => node.position.y));
+
+  return nodes.filter(
+    (node) =>
+      childIds.includes(node.id) &&
+      node.position.y === minY
+  );
+}

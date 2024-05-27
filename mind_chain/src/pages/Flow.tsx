@@ -108,20 +108,6 @@ const Flow = () => {
     });
   }, [edges, setNodes]);
 
-  // 检查是否存在重叠的节点
-  const hasOverlappingNodes = (nodes) => {
-    const nodePositions = new Set();
-    for (const node of nodes) {
-      const { x, y } = node.position;
-      const position = `${x},${y}`;
-      if (nodePositions.has(position)) {
-        return true; // 存在重叠的节点
-      }
-      nodePositions.add(position);
-    }
-    return false; // 没有重叠的节点
-  };
-
   useEffect(() => {
     setEdges((eds) =>
       eds.map((edge) => ({
@@ -130,13 +116,6 @@ const Flow = () => {
       }))
     );
   }, []);
-
-  // 在节点发生变化时检查是否存在重叠的节点
-  useEffect(() => {
-    if (hasOverlappingNodes(nodes)) {
-      onLayout();
-    }
-  }, [nodes, onLayout]);
 
   useEffect(() => {
     const userId = sessionStorage.getItem("userId");
