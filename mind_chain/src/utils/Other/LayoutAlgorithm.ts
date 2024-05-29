@@ -18,9 +18,7 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
   }
 
   // 获取第一个节点的宽度和高度
-  const { width, height } = document
-    .querySelector(`[data-id="${nodes[0].id}"]`)
-    .getBoundingClientRect();
+  const { width, height } = nodes[0];
 
   // 找到 nodes 数组里 id 为 '0' 的根节点
   const originalRootNode = nodes.find((node) => node.id === "0");
@@ -76,6 +74,7 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
 
   // 让大小不一的节点依旧保持合理的横坐标
   adjustNodePositionX(uniqueLayoutedNodes);
+  
   // 根据priority再调整横坐标
   const adjustedNodes = adjustNodePositionByPriority(uniqueLayoutedNodes, edges);
 

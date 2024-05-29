@@ -14,7 +14,6 @@ function FlowButton({
   onNodesChange,
   onEdgesChange,
   onConnect,
-  onLayout,
   nodeTypes,
   userId,
   noteId,

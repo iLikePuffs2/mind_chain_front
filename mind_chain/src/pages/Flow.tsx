@@ -17,7 +17,7 @@ import { LayoutAlgorithm } from "../utils/Other/LayoutAlgorithm";
 import CustomNode from "../component/CustomNode";
 import { createContext } from "react";
 import Editor from "../pages/Editor";
-import '../css/CustomNode.css'
+import "../css/CustomNode.css";
 
 const initialNodes = [];
 const initialEdges = [];
@@ -100,14 +100,6 @@ const Flow = () => {
     [nodes, rootNode]
   );
 
-  // 重新排布节点
-  const onLayout = useCallback(() => {
-    setNodes((prevNodes) => {
-      const layouted = LayoutAlgorithm(prevNodes, edges);
-      return [...layouted.nodes];
-    });
-  }, [edges, setNodes]);
-
   useEffect(() => {
     setEdges((eds) =>
       eds.map((edge) => ({
@@ -123,6 +115,13 @@ const Flow = () => {
       fetchNoteDetail(userId);
     }
   }, []);
+
+  // 重新排布
+  const handleLayout = (nodes, edges) => {
+    const layouted = LayoutAlgorithm(nodes, edges);
+    setNodes([...layouted.nodes]);
+    setEdges([...layouted.edges]);
+  };
 
   // 查询笔记列表
   const fetchNotes = async () => {
@@ -256,6 +255,8 @@ const Flow = () => {
             },
             position: { x: 0, y: 0 },
             type: "customNode",
+            width: 1,
+            height: 1,
           },
           ...nodeList.map((node) => ({
             id: node.id.toString(),
@@ -266,34 +267,42 @@ const Flow = () => {
             },
             position: { x: 0, y: 0 },
             type: "customNode",
+            width: 0,
+            height: 0,
           })),
         ];
         setNodes(initialNodes);
         // 根据节点的 parentId 设置 edges 数组
-        setEdges(
-          nodeList.flatMap((node) => {
-            const edges = [];
-            if (node.parentId !== null) {
-              // 如果 parentId 不为 null,则根据逗号分隔的情况创建多条边
-              const parentIds = node.parentId.split(",");
-              parentIds.forEach((parentId) => {
-                edges.push({
-                  id: `${parentId}-${node.id}`,
-                  source: parentId,
-                  target: node.id.toString(),
-                });
-              });
-            } else if (node.id !== "0") {
-              // 如果 parentId 为 null,且节点 id 不为 "0"（根节点）,则创建一条从根节点到该节点的边
+        const edges = nodeList.flatMap((node) => {
+          const edges = [];
+          if (node.parentId !== null) {
+            // 如果 parentId 不为 null,则根据逗号分隔的情况创建多条边
+            const parentIds = node.parentId.split(",");
+            parentIds.forEach((parentId) => {
               edges.push({
-                id: `0-${node.id}`,
-                source: "0",
+                id: `${parentId}-${node.id}`,
+                source: parentId,
                 target: node.id.toString(),
               });
-            }
-            return edges;
-          })
-        );
+            });
+          } else if (node.id !== "0") {
+            // 如果 parentId 为 null,且节点 id 不为 "0"（根节点）,则创建一条从根节点到该节点的边
+            edges.push({
+              id: `0-${node.id}`,
+              source: "0",
+              target: node.id.toString(),
+            });
+          }
+          return edges;
+        });
+        setEdges(edges);
+
+        // 重新排布(调用了两次)
+        const layoutedResult = LayoutAlgorithm(initialNodes, edges);
+        layoutedResult.nodes[0].width = layoutedResult.nodes[0].style.width;
+        layoutedResult.nodes[0].height = layoutedResult.nodes[0].style.height;
+        handleLayout(layoutedResult.nodes, edges);
+
         // 保存当前选中的笔记和用户 ID
         setSelectedNote(note);
         sessionStorage.setItem("userId", userId);
@@ -331,7 +340,6 @@ const Flow = () => {
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
-              onLayout={onLayout}
               nodeTypes={nodeTypes}
               userId={userId}
               noteId={selectedNote?.id || ""}
