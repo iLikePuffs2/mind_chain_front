@@ -211,7 +211,7 @@ export const findLowerConvergenceNode = (currentNode, nodes, edges) => {
 };
 
 /**
- * 获取节点的直接子节点(不考虑level,考虑位置高度,适用于层级遍历)
+ * 获取节点的直接子节点(不考虑level,考虑位置高度,适用于层序遍历)
  *
  * @param nodeId 节点ID
  * @param nodes 节点列表

@@ -305,7 +305,7 @@ function findPathsAbove(
 }
 
 /**
- * 找到以指定节点为起点向下的所有路径中经过的所有节点
+ * 找到以指定节点为起点向下的所有路径中经过的所有节点(包括当前节点)
  * @param convergenceNode 指定节点
  * @param nodes 节点列表
  * @param edges 边列表
