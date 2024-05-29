@@ -146,53 +146,59 @@ export const addSiblingNode = (
   edges,
   setEdges
 ) => {
-  const maxId = getMaxNodeId(nodes);
-  const newNodeId = `${maxId + 1}`;
+// 获取当前最大的节点ID
+const maxId = getMaxNodeId(nodes);
+// 新节点的ID为最大ID加1
+const newNodeId = `${maxId + 1}`;
+// 找到当前节点下方的非同级收敛节点(如果有)
+const convergenceNode = findConvergenceNode(currentNode, nodes, edges);
+// 新节点的初始位置
+let newNodePosition = { x: 0, y: 0 };
+// 查找当前节点对象
+const currentNodeObj = nodes.find((node) => node.data.id === currentNode.id);
 
-  const convergenceNode = findConvergenceNode(currentNode, nodes, edges);
+if (currentNodeObj) {
+  // 找到当前节点的叶子节点(如果有)
+  const leafNodes = findLeafNodes(currentNode.id, nodes, edges);
 
-  let newNodePosition = { x: 0, y: 0 };
-
-  const currentNodeObj = nodes.find((node) => node.data.id === currentNode.id);
-  if (currentNodeObj) {
-    const leafNodes = findLeafNodes(currentNode.id, nodes, edges);
-    if (convergenceNode) {
-      newNodePosition = {
-        x: convergenceNode.position.x,
-        y: convergenceNode.position.y - 60,
-      };
-    } else if (leafNodes.length > 0) {
-      const lastLeafNode = nodes.find(
-        (node) =>
-          String(node.data.id) === String(leafNodes[leafNodes.length - 1].id)
-      );
-      if (lastLeafNode) {
-        newNodePosition = {
-          x: lastLeafNode.position.x,
-          y: lastLeafNode.position.y + 110,
-        };
-      }
-    } else {
+  if (convergenceNode) {
+    // 如果有收敛节点,新节点的位置为收敛节点的位置向上偏移60
+    newNodePosition = {
+      x: convergenceNode.position.x,
+      y: convergenceNode.position.y - 60,
+    };
+  } else if (leafNodes.length > 0) {
+    // 如果有叶子节点,新节点的位置为最后一个叶子节点的位置向下偏移120
+    const lastLeafNode = nodes.find(
+      (node) => String(node.data.id) === String(leafNodes[leafNodes.length - 1].id)
+    );
+    if (lastLeafNode) {
       newNodePosition = {
         x: currentNodeObj.position.x,
-        y: currentNodeObj.position.y + 120,
+        y: lastLeafNode.position.y + 120,
       };
     }
+  } else {
+    // 如果既没有收敛节点也没有叶子节点,新节点的位置为当前节点的位置向下偏移120
+    newNodePosition = {
+      x: currentNodeObj.position.x,
+      y: currentNodeObj.position.y + 120,
+    };
   }
+}
 
-  // 循环判断是否有重合节点,直到没有重合节点为止
-  let overlappingNode;
-  do {
-    overlappingNode = nodes.find(
-      (node) =>
-        node.position.x === newNodePosition.x &&
-        node.position.y === newNodePosition.y
-    );
-    if (overlappingNode) {
-      // 如果有重合节点,就右移一些
-      newNodePosition.x += 50;
-    }
-  } while (overlappingNode);
+// 循环判断是否有重合节点,直到没有重合节点为止
+let overlappingNode;
+do {
+  // 查找是否有位置与新节点重合的节点
+  overlappingNode = nodes.find(
+    (node) => node.position.x === newNodePosition.x && node.position.y === newNodePosition.y
+  );
+  if (overlappingNode) {
+    // 如果有重合节点,就将新节点的位置向右偏移50
+    newNodePosition.x += 50;
+  }
+} while (overlappingNode);
 
   const newNode = {
     id: newNodeId,
