@@ -4,10 +4,20 @@ import { getDirectChildNodes } from "./ChangeNodePositionByPriority";
 
 export const adjustNodePositionX = (nodes, edges) => {
   // 让大小不一的节点居中对齐
+  centerAlignment(nodes);
+
+  // 缩短一级节点的子节点的水平间距
+  reduceHorizontalSpacing(nodes, edges);
+
+  // 调整一级节点及其子节点的位置
+  adjustLevelOneNodesPosition(nodes, edges);
+};
+
+// 让大小不一的节点居中对齐
+const centerAlignment = (nodes) => {
   nodes.forEach((node) => {
     const level = node.data.level;
     let xOffset;
-
     if (level >= 9) {
       // level>=9的都与level=9的x变化值一致
       xOffset = 67.5;
@@ -15,15 +25,8 @@ export const adjustNodePositionX = (nodes, edges) => {
       // level=1,x+=7.5; level=2,x+=15; 以此类推
       xOffset = 7.5 * level;
     }
-
     node.position.x += xOffset;
   });
-
-  // 缩短一级节点的子节点的水平间距
-  reduceHorizontalSpacing(nodes, edges);
-
-  // 调整一级节点及其子节点的位置
-  adjustLevelOneNodesPosition(nodes, edges);
 };
 
 /**
@@ -92,15 +95,23 @@ function reduceChildNodesHorizontalSpacing(
           // 将子节点的 position.x 设置为当前节点的 position.x
           childNode.position.x = currentNode.position.x + 7.5;
         } else {
-          // 如果该子节点有多个直接父节点
-          // 计算所有直接父节点的 position.x 的平均值
-          const avgX =
-            directParentNodes.reduce(
-              (sum, parent) => sum + parent.position.x,
-              0
-            ) / directParentNodes.length;
-          // 将子节点的 position.x 设置为平均值
-          childNode.position.x = avgX;
+          // 如果该子节点有多个直接父节点（收敛节点）
+          // 找到第一条以该子节点为 target 的边
+          const firstEdge = edges.find((edge) => edge.target === childNode.id);
+          // 获取该边的 source 节点
+          const sourceNode = nodes.find((node) => node.id === firstEdge.source);
+
+          // 沿着第一条以该子节点为 target 的边向上找，直到找到第一个和该子节点 level 相同的节点
+          let levelNode = sourceNode;
+          while (levelNode.data.level !== childNode.data.level) {
+            const parentEdge = edges.find(
+              (edge) => edge.target === levelNode.id
+            );
+            levelNode = nodes.find((node) => node.id === parentEdge.source);
+          }
+
+          // 将子节点的 position.x 设置为找到的节点的 position.x
+          childNode.position.x = levelNode.position.x;
         }
       } else if (directChildNodes.length > 1) {
         // 如果有多个直接子节点
