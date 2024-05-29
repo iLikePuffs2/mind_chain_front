@@ -33,8 +33,8 @@ export const getCurrentTaskList = (nodes, edges) => {
   // 从根节点(ID 为 "0" 的节点)开始前序遍历
   preorderFindTasks("0");
 
-  // 递归查找给定节点的父任务节点
-  const findParentTask = (nodeId) => {
+  // 递归查找给定节点的父任务节点,返回经历的所有父节点的名字
+  const findParentTaskNames = (nodeId, parentNames = []) => {
     // 查找以给定节点为目标节点的边
     const parentEdge = edges.find((edge) => edge.target === nodeId);
 
@@ -43,17 +43,20 @@ export const getCurrentTaskList = (nodes, edges) => {
       // 根据父边的源节点 ID 查找对应的节点对象
       const parentNode = nodes.find((node) => node.id === parentEdge.source);
 
-      // 如果父节点存在且其级别为 1,则返回该父节点
-      if (parentNode && parentNode.data.level === 1) {
-        return parentNode;
-      } else {
-        // 否则递归查找父节点的父任务节点
-        return findParentTask(parentEdge.source);
+      // 如果父节点存在
+      if (parentNode) {
+        // 将父节点的名字添加到 parentNames 数组中
+        parentNames.push(parentNode.data.name);
+
+        // 如果父节点的级别不为 1,则继续递归查找父节点的父任务节点
+        if (parentNode.data.level !== 1) {
+          return findParentTaskNames(parentEdge.source, parentNames);
+        }
       }
     }
 
-    // 如果没有找到父任务节点,返回 null
-    return null;
+    // 返回经历的所有父节点的名字,按照逆序排列
+    return parentNames.reverse().join(" - ");
   };
 
   // 遍历当前任务节点
@@ -63,7 +66,7 @@ export const getCurrentTaskList = (nodes, edges) => {
       parentTasks.set(task.id, [task]);
     } else {
       // 否则查找任务节点的父任务节点
-      const parentTask = findParentTask(task.id);
+      const parentTask = nodes.find((node) => node.id === edges.find((edge) => edge.target === task.id).source);
 
       // 如果找到了父任务节点
       if (parentTask) {
@@ -85,16 +88,16 @@ export const getCurrentTaskList = (nodes, edges) => {
   let taskIndex = 1;
 
   // 遍历 parentTasks 中的每个父任务及其子任务
-  parentTasks.forEach((tasks, parentId) => {
-    // 根据父任务的 ID 查找对应的节点对象,获取其名称
-    const parentName = nodes.find((node) => node.id === parentId).data.name;
-
+  parentTasks.forEach((tasks) => {
     // 遍历每个子任务
     tasks.forEach((task) => {
+      // 查找任务节点经历的所有父节点的名字
+      const parentNames = findParentTaskNames(task.id);
+
       // 将任务添加到任务列表中,包括任务名称、父任务名称(如果有)以及节点数据
       taskList.push({
         task: `${taskIndex}. ${task.data.name}`, // 在任务名称前面添加数字序号
-        parent: task.data.level === 1 ? "" : parentName,
+        parent: parentNames,
         nodeData: task.data,
       });
 
