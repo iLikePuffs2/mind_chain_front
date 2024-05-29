@@ -1,13 +1,11 @@
 import { findNodesUnderConvergenceNode } from "./CalculateStatus";
-import { getDirectParentNodes } from "./CalculateStatus";
-import { getDirectChildNodes } from "./ChangeNodePositionByPriority";
 
 export const adjustNodePositionX = (nodes, edges) => {
   // 让大小不一的节点居中对齐
   centerAlignment(nodes);
 
-  // 缩短一级节点的子节点的水平间距
-  reduceHorizontalSpacing(nodes, edges);
+  // 对齐同级收敛节点
+  alignConvergenceNode(nodes, edges);
 
   // 调整一级节点及其子节点的位置
   adjustLevelOneNodesPosition(nodes, edges);
@@ -30,138 +28,43 @@ const centerAlignment = (nodes) => {
 };
 
 /**
- * 缩短一级节点的子节点的水平间距
- * @param nodes 节点数组
- * @param edges 边数组
- * @returns 调整后的节点数组
- */
-function reduceHorizontalSpacing(nodes: Node[], edges: Edge[]): Node[] {
-  // 获取所有 level 为 1 的节点
-  const levelOneNodes = nodes.filter((node) => node.data.level === 1);
-
-  // 对每个一级节点进行调整
-  levelOneNodes.forEach((node) => {
-    reduceChildNodesHorizontalSpacing(node, nodes, edges);
-  });
-
-  return nodes;
-}
-
-/**
- * 调整子节点位置
- * @param node 当前节点
+ * 对齐同级收敛节点
  * @param nodes 节点数组
  * @param edges 边数组
  */
-function reduceChildNodesHorizontalSpacing(
-  node: Node,
-  nodes: Node[],
-  edges: Edge[]
-) {
-  // 创建一个队列，用于层序遍历
-  const queue: Node[] = [];
-  // 将当前节点加入队列
-  queue.push(node);
+function alignConvergenceNode(nodes: Node[], edges: Edge[]): void {
+  nodes.forEach((node) => {
+    // 获取该节点的直接父节点
+    const directParentNodes = getDirectParentNodes(node.id, nodes, edges);
+    // 如果该节点有多个直接父节点（收敛节点）
+    if (directParentNodes.length > 1) {
+      // 找到第一条以该节点为 target 的边
+      const firstEdge = edges.find((edge) => edge.target === node.id);
+      // 获取该边的 source 节点
+      const sourceNode = nodes.find((node) => node.id === firstEdge.source);
 
-  // 当队列不为空时，继续遍历
-  while (queue.length > 0) {
-    // 获取队列的长度，表示当前层的节点数
-    const levelSize = queue.length;
-
-    // 遍历当前层的所有节点
-    for (let i = 0; i < levelSize; i++) {
-      // 从队列中取出一个节点
-      const currentNode = queue.shift();
-
-      // 获取当前节点的直接子节点
-      const directChildNodes = getDirectChildNodes(
-        currentNode.id,
-        nodes,
-        edges
-      );
-
-      // 如果只有一个直接子节点
-      if (directChildNodes.length === 1) {
-        const childNode = directChildNodes[0];
-        // 获取该子节点的直接父节点
-        const directParentNodes = getDirectParentNodes(
-          childNode.id,
-          nodes,
-          edges
-        );
-
-        // 如果该子节点只有一个直接父节点
-        if (directParentNodes.length === 1) {
-          // 将子节点的 position.x 设置为当前节点的 position.x
-          childNode.position.x = currentNode.position.x + 7.5;
-        } else {
-          // 如果该子节点有多个直接父节点（收敛节点）
-          // 找到第一条以该子节点为 target 的边
-          const firstEdge = edges.find((edge) => edge.target === childNode.id);
-          // 获取该边的 source 节点
-          const sourceNode = nodes.find((node) => node.id === firstEdge.source);
-
-          // 沿着第一条以该子节点为 target 的边向上找，直到找到第一个和该子节点 level 相同的节点
-          let levelNode = sourceNode;
-          while (levelNode.data.level !== childNode.data.level) {
-            const parentEdge = edges.find(
-              (edge) => edge.target === levelNode.id
-            );
-            levelNode = nodes.find((node) => node.id === parentEdge.source);
-          }
-
-          // 将子节点的 position.x 设置为找到的节点的 position.x
-          childNode.position.x = levelNode.position.x;
-        }
-      } else if (directChildNodes.length > 1) {
-        // 如果有多个直接子节点
-        const n = directChildNodes.length;
-        const width = currentNode.style.width;
-
-        // 如果子节点个数为奇数
-        if (n % 2 === 1) {
-          // 计算第一个子节点的 position.x
-          const startX =
-            currentNode.position.x - ((n - 1) / 2) * 1.25 * width + 7.5;
-          // 对每个子节点设置 position.x
-          directChildNodes.forEach((childNode, index) => {
-            childNode.position.x = startX + index * 1.25 * width;
-          });
-        } else {
-          // 如果子节点个数为偶数
-          // 计算第一个子节点的 position.x
-          const startX = currentNode.position.x - (n / 2) * width + 7.5;
-          // 对每个子节点设置 position.x
-          directChildNodes.forEach((childNode, index) => {
-            if (index < n / 2) {
-              childNode.position.x = startX + index * width;
-            } else if (index === n / 2) {
-              childNode.position.x =
-                directChildNodes[index - 1].position.x + width * 2;
-            } else {
-              childNode.position.x =
-                directChildNodes[index - 1].position.x + width;
-            }
-          });
-        }
+      // 沿着第一条以该节点为 target 的边向上找，直到找到第一个和该节点 level 相同的节点
+      let levelNode = sourceNode;
+      while (levelNode.data.level !== node.data.level) {
+        const parentEdge = edges.find((edge) => edge.target === levelNode.id);
+        levelNode = nodes.find((node) => node.id === parentEdge.source);
       }
 
-      // 将当前节点的直接子节点加入队列，用于下一层的遍历
-      queue.push(...directChildNodes);
+      // 将节点的 position.x 设置为找到的节点的 position.x
+      node.position.x = levelNode.position.x;
     }
-  }
+  });
 }
 
 /**
  * 调整一级节点及其子节点的位置(保证每个一级节点及其子节点的水平间隔)
  * @param nodes 节点列表
  * @param edges 边列表
- * @returns 调整后的节点列表
  */
 export function adjustLevelOneNodesPosition(
   nodes: Node[],
   edges: Edge[]
-): Node[] {
+): void {
   // 按 position.x 从小到大排序的一级节点
   const levelOneNodes = nodes
     .filter((node) => node.data.level === 1)
@@ -217,9 +120,21 @@ export function adjustLevelOneNodesPosition(
       });
 
       // 更新下一个一级节点的起始 x 坐标
-      currentX = interval.max + offset + 235;
+      currentX = interval.max + offset + 300;
     });
   }
+}
 
-  return nodes;
+export function getDirectParentNodes(
+  nodeId: string,
+  nodes: Node[],
+  edges: Edge[]
+): Node[] {
+  const parentIds = edges
+    .filter((edge) => edge.target === nodeId)
+    .map((edge) => edge.source);
+  return nodes.filter(
+    (node) =>
+      parentIds.includes(node.id)
+  );
 }

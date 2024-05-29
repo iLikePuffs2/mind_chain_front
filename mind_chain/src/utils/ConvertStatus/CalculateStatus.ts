@@ -148,9 +148,9 @@ export function calculateNodeStatusAndDetails(nodes: Node[], edges: Edge[]) {
 }
 
 /**
- * 获取节点的直接父节点
+ * 获取节点的直接父节点(此处限定了父节点的level必须比当前节点小，才被视为直接父节点，所以收敛节点会计算错误)
  *
- * @param nodeId 节点ID
+ * @param nodeId 当前节点ID
  * @param nodes 节点列表
  * @param edges 边列表
  * @returns 直接父节点列表
