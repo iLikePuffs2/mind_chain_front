@@ -49,6 +49,34 @@ const Editor: React.FC<EditorProps> = ({
   const [historyList, setHistoryList] = useState([]);
 
   const userId = sessionStorage.getItem("userId");
+  const inputRef = useRef(null);
+  const textAreaRef = useRef(null);
+
+  useEffect(() => {
+    const selected = contextNodes.find((node) => node.selected);
+    setSelectedNode(selected || null);
+    setShowContext(selected && selected.id !== "0");
+
+    // 在选中节点发生变化时,更新 Input 和 TextArea 的值
+    if (selected && inputRef.current && textAreaRef.current) {
+      inputRef.current.value = selected.data.name;
+      textAreaRef.current.value = selected.data.context || "";
+    }
+  }, [contextNodes]);
+
+  const handleNameChange = (e) => {
+    setSelectedNode({
+      ...selectedNode,
+      data: { ...selectedNode.data, name: e.target.value },
+    });
+  };
+
+  const handleContextChange = (e) => {
+    setSelectedNode({
+      ...selectedNode,
+      data: { ...selectedNode.data, context: e.target.value },
+    });
+  };
 
   useEffect(() => {
     const selected = contextNodes.find((node) => node.selected);
@@ -239,31 +267,20 @@ const Editor: React.FC<EditorProps> = ({
           style={{ display: "flex", flexDirection: "column", height: "100%" }}
         >
           <Input
-            value={selectedNode.data.name}
-            onChange={(e) =>
-              setSelectedNode({
-                ...selectedNode,
-                data: { ...selectedNode.data, name: e.target.value },
-              })
-            }
+            key={`input-${selectedNode.id}`}
+            ref={inputRef}
+            defaultValue={selectedNode.data.name}
+            onChange={handleNameChange}
             style={{ width: "100%", marginBottom: 16 }}
-            autoFocus={selectedNode.data.name === "新节点"}
-            ref={(input) => {
-              if (selectedNode.data.name === "新节点" && input) {
-                input.select();
-              }
-            }}
+            autoFocus={!selectedNode.data.name}
           />
           <TextArea
-            value={selectedNode.data.context || ""}
-            onChange={(e) =>
-              setSelectedNode({
-                ...selectedNode,
-                data: { ...selectedNode.data, context: e.target.value },
-              })
-            }
+            key={`textarea-${selectedNode.id}`}
+            ref={textAreaRef}
+            defaultValue={selectedNode.data.context || ""}
+            onChange={handleContextChange}
             style={{ flex: 1 }}
-            autoFocus={selectedNode.data.name !== "新节点"}
+            autoFocus={!!selectedNode.data.name}
           />
         </div>
       )}
