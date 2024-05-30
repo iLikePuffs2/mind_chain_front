@@ -19,6 +19,7 @@ import { createContext } from "react";
 import Editor from "../pages/Editor";
 import "../css/CustomNode.css";
 import { saveAndUpdateNote } from "../utils/ConvertStatus/SaveAndUpdateNote";
+import { checkBlockedTime } from "../utils/ConvertStatus/Unblock";
 
 const initialNodes = [];
 const initialEdges = [];
@@ -123,7 +124,12 @@ const Flow = () => {
 
     // 设置定时器,每隔半小时自动保存一次
     const intervalId = setInterval(() => {
-      saveAndUpdateNote(userId, selectedNote?.id || "", selectedNote?.name || "", nodes);
+      saveAndUpdateNote(
+        userId,
+        selectedNote?.id || "",
+        selectedNote?.name || "",
+        nodes
+      );
     }, 1800000);
 
     // 在组件卸载时清除定时器
@@ -131,6 +137,19 @@ const Flow = () => {
       clearInterval(intervalId);
     };
   }, [nodes, selectedNote]);
+
+  // 检查阻塞时间
+  useEffect(() => {
+    // 设置定时器,每分钟检查一次
+    const intervalId = setInterval(() => {
+      checkBlockedTime(nodes, setNodes, edges);
+    }, 60000);
+
+    // 在组件卸载时清除定时器
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [nodes, setNodes]);
 
   // 重新排布
   const handleLayout = (nodes, edges) => {
