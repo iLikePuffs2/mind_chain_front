@@ -171,7 +171,7 @@ export function getDirectParentNodes(
 }
 
 /**
- * 获取节点的直接子节点
+ * 获取节点的直接子节点(同样限定了level)
  *
  * @param nodeId 节点ID
  * @param nodes 节点列表

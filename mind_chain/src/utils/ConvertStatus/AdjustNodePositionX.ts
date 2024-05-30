@@ -125,6 +125,7 @@ export function adjustLevelOneNodesPosition(
   }
 }
 
+// 获取节点的直接父节点(不考虑level的问题)
 export function getDirectParentNodes(
   nodeId: string,
   nodes: Node[],

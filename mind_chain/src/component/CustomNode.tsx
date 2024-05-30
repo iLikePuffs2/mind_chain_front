@@ -148,7 +148,6 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
               <Dropdown overlay={stopMenu} placement="top" trigger={["click"]}>
                 <StopOutlined style={{ fontSize: 20 }} />
               </Dropdown>
-              <HourglassOutlined style={{ fontSize: 20 }} />
               <Dropdown
                 overlay={columnWidthMenu}
                 placement="top"

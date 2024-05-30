@@ -2,7 +2,8 @@ import { Node, Edge } from "reactflow";
 import { findNodesUnderConvergenceNode } from "./CalculateStatus";
 import { findConvergenceNode } from "../Other/AddNode";
 import { convertStatus } from "./ConvertStatus";
-import { getDirectParentNodes } from "./CalculateStatus";
+import { getDirectParentNodes } from "./AdjustNodePositionX";
+import { getDirectChildNodes } from "./CalculateStatus";
 
 export const FinishNode = (
   currentNode,
@@ -18,12 +19,12 @@ export const FinishNode = (
   // 寻找当前节点下方的非同级收敛节点
   const convergenceNode = findConvergenceNode(currentNode, nodes, edges);
 
-  // 如果存在收敛节点
+  // 如果当前节点下方存在非同级收敛节点
   if (convergenceNode) {
     const nodesToRemove = [];
     const edgesToRemove = [];
 
-    // 找到当前节点到收敛节点之间的所有节点,并将它们存储在nodesToRemove和nodesBetween数组中
+    // 找到当前节点到非同级收敛节点之间的所有节点,并将它们存储在nodesToRemove和nodesBetween数组中
     const nodesBetween = findNodesBetween(
       currentNodeObj,
       convergenceNode,
@@ -45,26 +46,47 @@ export const FinishNode = (
       (edge) => edge.target === currentNodeObj.id
     );
 
-    // 获取直接父节点
-    const parentNodes = getDirectParentNodes(currentNodeObj.id, nodes, edges);
-
-    // 获取当前节点的直接父节点下方的非同级收敛节点
-    const parentConvergenceNode = findConvergenceNode(parentNodes[0], nodes, edges);
-
-    // 如果直接父节点:数量=1，且拥有下方的非同级收敛节点，且 level < 当前节点，且作为不止一条线段的 source,就不连线
-    const shouldNotConnect =
-      parentNodes.length === 1 &&
-      parentConvergenceNode &&
-      parentNodes[0].data.level < currentNodeObj.data.level &&
-      edges.filter((edge) => edge.source === parentNodes[0].id).length > 1;
-
-    if (!shouldNotConnect) {
+    // 如果当前节点是收敛节点(作为不止一条线段的target)
+    if (incomingEdges.length > 1) {
       // 把指向当前节点的线,全部连到收敛节点上
       const newEdges = incomingEdges.map((edge) => ({
         ...edge,
         target: convergenceNode.id,
       }));
       edges = [...edges, ...newEdges];
+    } else {
+      // 当前节点不是收敛节点,只有一个直接父节点
+      // 获取直接父节点
+      const parentNode = getDirectParentNodes(
+        currentNodeObj.id,
+        nodes,
+        edges
+      )[0];
+      // 获取直接父节点的收敛节点
+      const parentConvergenceNode = findConvergenceNode(
+        parentNode,
+        nodes,
+        edges
+      );
+      // 获取直接父节点的直接子节点
+      const parentDirectChildNodes = getDirectChildNodes(
+        parentNode.id,
+        nodes,
+        edges
+      );
+
+      // 如果直接父节点的收敛节点和当前节点的收敛节点不是同一个节点,或者直接父节点只有一个直接子节点
+      if (
+        parentConvergenceNode.id !== convergenceNode.id ||
+        parentDirectChildNodes.length === 1
+      ) {
+        // 把指向当前节点的线连到当前节点下方的非同级收敛节点上
+        const newEdge = {
+          ...incomingEdges[0],
+          target: convergenceNode.id,
+        };
+        edges = [...edges, newEdge];
+      }
     }
 
     // 再断线
