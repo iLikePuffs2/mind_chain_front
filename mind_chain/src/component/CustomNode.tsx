@@ -15,7 +15,11 @@ import {
   SmileOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Menu, Space, Tooltip, DatePicker, Popover } from "antd";
-import { addSiblingNode, addChildNode } from "../utils/Other/AddNode";
+import {
+  addUnderSiblingNode,
+  addUpperSiblingNode,
+  addChildNode,
+} from "../utils/Other/AddNode";
 import { blockNode } from "../utils/ConvertStatus/BlockNode";
 import { NodesEdgesContext } from "../pages/Flow";
 import AddBlockReason from "./Pop/AddBlockReason";
@@ -37,18 +41,33 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
   const plusMenu = (
     <Menu>
       {!isRoot && data.level !== 1 && (
-        <Menu.Item
-          key="1"
-          onClick={() => addSiblingNode(data, nodes, setNodes, edges, setEdges)}
-        >
-          <Space>
-            <UsergroupAddOutlined />
-            <span>新增同级节点</span>
-          </Space>
-        </Menu.Item>
+        <>
+          <Menu.Item
+            key="1"
+            onClick={() =>
+              addUpperSiblingNode(data, nodes, setNodes, edges, setEdges)
+            }
+          >
+            <Space>
+              <UsergroupAddOutlined />
+              <span>新增同级节点(上)</span>
+            </Space>
+          </Menu.Item>
+          <Menu.Item
+            key="2"
+            onClick={() =>
+              addUnderSiblingNode(data, nodes, setNodes, edges, setEdges)
+            }
+          >
+            <Space>
+              <UsergroupAddOutlined />
+              <span>新增同级节点(下)</span>
+            </Space>
+          </Menu.Item>
+        </>
       )}
       <Menu.Item
-        key="2"
+        key="3"
         onClick={() => addChildNode(data, nodes, setNodes, edges, setEdges)}
       >
         <Space>

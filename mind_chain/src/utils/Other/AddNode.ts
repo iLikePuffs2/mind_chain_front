@@ -138,8 +138,8 @@ export const findConvergenceNode = (currentNode, nodes, edges) => {
   return convergenceNode;
 };
 
-// 新增同级节点
-export const addSiblingNode = (
+// 新增同级节点(向下)
+export const addUnderSiblingNode = (
   currentNode,
   nodes,
   setNodes,
@@ -383,10 +383,12 @@ export const addChildNode = (currentNode, nodes, setNodes, edges, setEdges) => {
   setNodes([...nodes, newNode, currentNodeObj]);
 
   // 分情况处理的逻辑
+  let updatedNodes = [];
+  let updatedEdges = [];
   if (convergenceNode) {
     // 1.有收敛节点,路径之间无其他节点
     if (directChildNodes.length === 0) {
-      const updatedEdges = removeEdges(
+      updatedEdges = removeEdges(
         currentNode.id,
         convergenceNode.id,
         edges
@@ -404,11 +406,11 @@ export const addChildNode = (currentNode, nodes, setNodes, edges, setEdges) => {
       );
       setEdges(updatedEdges);
       // 顺便流转新增的节点状态
-      const updatedNodes = convertStatus([...nodes, newNode], updatedEdges);
+      updatedNodes = convertStatus([...nodes, newNode], updatedEdges);
       setNodes(updatedNodes);
     } else {
       // 2.有收敛节点,路径之间有其他节点
-      const updatedEdges = edges.concat(
+      updatedEdges = edges.concat(
         {
           id: `${currentNode.id}-${newNodeId}`,
           source: currentNode.id.toString(),
@@ -422,25 +424,131 @@ export const addChildNode = (currentNode, nodes, setNodes, edges, setEdges) => {
       );
       setEdges(updatedEdges);
       // 顺便流转新增的节点状态
-      const updatedNodes = convertStatus([...nodes, newNode], updatedEdges);
+      updatedNodes = convertStatus([...nodes, newNode], updatedEdges);
       setNodes(updatedNodes);
     }
   } else {
-    // ...
-    const updatedEdges = edges.concat({
+    updatedEdges = edges.concat({
       id: `${currentNode.id}-${newNodeId}`,
       source: currentNode.id.toString(),
       target: newNodeId.toString(),
     });
     setEdges(updatedEdges);
     // 顺便流转新增的节点状态
-    const updatedNodes = convertStatus([...nodes, newNode], updatedEdges);
+    updatedNodes = convertStatus([...nodes, newNode], updatedEdges);
     setNodes(updatedNodes);
+  }
+
+  return { nodes: updatedNodes, edges: updatedEdges };
+};
+
+// 新增同级节点(向上)
+export const addUpperSiblingNode = (
+  currentNode,
+  nodes,
+  setNodes,
+  edges,
+  setEdges
+) => {
+  // 找到当前节点
+  const currentNodeObj = nodes.find((node) => node.data.id === currentNode.id);
+  // 把当前节点设为不被选中
+  currentNodeObj.selected = false;
+  // 获取以当前节点为 target 的线段
+  const incomingEdges = edges.filter(
+    (edge) => edge.target === currentNodeObj.id
+  );
+
+  // 如果当前节点有多个直接父节点(作为不止一条线段的 target)
+  if (incomingEdges.length > 1) {
+    // 获取第一根以当前节点为 target 的线段
+    const firstIncomingEdge = incomingEdges[0];
+
+    // 沿着第一根线段向上找,直到找到 level <= 当前节点的那个节点
+    let upperNode = nodes.find((node) => node.id === firstIncomingEdge.source);
+    let upperEdge = firstIncomingEdge;
+
+    while (upperNode && upperNode.data.level !== currentNodeObj.data.level) {
+      const incomingEdges = edges.filter(
+        (edge) => edge.target === upperNode.id
+      );
+      upperEdge = incomingEdges[0];
+      upperNode = nodes.find((node) => node.id === upperEdge.source);
+    }
+
+    if (upperNode && upperNode.data.level === currentNodeObj.data.level) {
+      // 调用向下新增同级节点函数 addUnderSiblingNode
+      addUnderSiblingNode(upperNode.data, nodes, setNodes, edges, setEdges);
+    }
+  } else if (incomingEdges.length === 1) {
+    // 如果当前节点只有一个直接父节点
+    const parentNode = nodes.find(
+      (node) => node.id === incomingEdges[0].source
+    );
+
+    // 如果直接父节点的 level < 当前节点
+    if (parentNode.data.level < currentNodeObj.data.level) {
+      // 调用新增子节点函数 addChildNode
+      const newNodesAndEdges = addChildNode(
+        parentNode.data,
+        nodes,
+        setNodes,
+        edges,
+        setEdges
+      );
+      nodes = newNodesAndEdges.nodes;
+      edges = newNodesAndEdges.edges;
+
+      // 获取 nodes 数组中 id 最大的节点
+      const maxIdNode = nodes.reduce((maxNode, currentNode) =>
+        parseInt(currentNode.id) > parseInt(maxNode.id) ? currentNode : maxNode
+      );
+      const newNodeId = parseInt(maxIdNode.id).toString();
+
+      // 处理线段
+      const updatedEdges = edges
+        .filter((edge) => edge.id !== incomingEdges[0].id) // 移除直接父节点连接当前节点的这条线段
+        .filter((edge) => edge.source !== newNodeId) // 移除以新节点为 source 的线段
+        .concat([
+          // 新增新节点指向当前节点的线段
+          {
+            id: `${newNodeId}-${currentNodeObj.id}`,
+            source: newNodeId,
+            target: currentNodeObj.id,
+          },
+        ]);
+      setEdges(updatedEdges);
+      // 再次流转新增的节点状态(因为变换了线段)
+      nodes = convertStatus(nodes, updatedEdges);
+      setNodes(nodes);
+    } else if (parentNode.data.level === currentNodeObj.data.level) {
+      // 如果直接父节点的 level == 当前节点
+      // 调用向下新增同级节点函数 addUnderSiblingNode
+      addUnderSiblingNode(parentNode.data, nodes, setNodes, edges, setEdges);
+    } else {
+      // 如果直接父节点的 level > 当前节点
+      // 沿着这条线段向上找,找到 level == 当前节点的那个节点
+      let upperNode = parentNode;
+      let upperEdge = incomingEdges[0];
+
+      while (upperNode && upperNode.data.level !== currentNodeObj.data.level) {
+        const incomingEdges = edges.filter(
+          (edge) => edge.target === upperNode.id
+        );
+        upperEdge = incomingEdges[0];
+        upperNode = nodes.find((node) => node.id === upperEdge.source);
+      }
+
+      if (upperNode && upperNode.data.level === currentNodeObj.data.level) {
+        // 调用向下新增同级节点函数 addUnderSiblingNode
+        addUnderSiblingNode(upperNode.data, nodes, setNodes, edges, setEdges);
+      }
+    }
   }
 };
 
 // 对edges去重
-const dedupEdges = (edges) => {
+export const dedupEdges = (edges) => {
   const uniqueEdges = {};
 
   for (const edge of edges) {
