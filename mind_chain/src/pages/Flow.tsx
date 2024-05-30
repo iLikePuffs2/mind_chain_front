@@ -18,6 +18,7 @@ import CustomNode from "../component/CustomNode";
 import { createContext } from "react";
 import Editor from "../pages/Editor";
 import "../css/CustomNode.css";
+import { saveAndUpdateNote } from "../utils/ConvertStatus/SaveAndUpdateNote";
 
 const initialNodes = [];
 const initialEdges = [];
@@ -115,6 +116,21 @@ const Flow = () => {
       fetchNoteDetail(userId);
     }
   }, []);
+
+  // 自动保存(定时任务)
+  useEffect(() => {
+    const userId = sessionStorage.getItem("userId");
+
+    // 设置定时器,每隔半小时自动保存一次
+    const intervalId = setInterval(() => {
+      saveAndUpdateNote(userId, selectedNote?.id || "", selectedNote?.name || "", nodes);
+    }, 1800000);
+
+    // 在组件卸载时清除定时器
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [nodes, selectedNote]);
 
   // 重新排布
   const handleLayout = (nodes, edges) => {

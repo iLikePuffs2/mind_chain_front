@@ -112,19 +112,25 @@ const Editor: React.FC<EditorProps> = ({
 
   // 自动保存节点信息(忽略根节点)
   useEffect(() => {
+    const selected = contextNodes.find((node) => node.selected);
+    setSelectedNode(selected || null);
+    setShowContext(selected && selected.id !== "0");
+  }, [contextNodes]);
+
+  useEffect(() => {
     if (selectedNode) {
       const currentSelectedNode = contextNodes.find(
         (node) => node.id === selectedNode.id
       );
       if (
         currentSelectedNode &&
-        !currentSelectedNode.selected &&
-        currentSelectedNode.id !== "0"
+        (selectedNode.data.name !== currentSelectedNode.data.name ||
+          selectedNode.data.context !== currentSelectedNode.data.context)
       ) {
         handleConfirm();
       }
     }
-  }, [contextNodes]);
+  }, [selectedNode]);
 
   /* 接收一个节点 ID 作为参数，遍历 contextNodes 数组，将与该 ID 匹配的节点的 selected 值设为 true，
   其他节点的 selected 值设为 false */
