@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useRef, useState, useContext, useEffect } from "react";
 import { List, Typography, Space, Input, Modal } from "antd";
 import {
   CheckCircleOutlined,
@@ -20,10 +20,19 @@ interface EditorProps {
   edges: any[];
   noteId: string;
   noteName: string;
-  fetchNoteDetail: (userId: string, noteId?: string) => Promise<{ note: any; nodeList: any[] } | null>;
+  fetchNoteDetail: (
+    userId: string,
+    noteId?: string
+  ) => Promise<{ note: any; nodeList: any[] } | null>;
 }
 
-const Editor: React.FC<EditorProps> = ({ nodes, edges, noteId, noteName, fetchNoteDetail }) => {
+const Editor: React.FC<EditorProps> = ({
+  nodes,
+  edges,
+  noteId,
+  noteName,
+  fetchNoteDetail,
+}) => {
   const {
     nodes: contextNodes,
     edges: contextEdges,
@@ -214,11 +223,11 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges, noteId, noteName, fetchNo
           阻塞任务列表
         </button>
         <button onClick={handleHistoryClick}>
-          <BranchesOutlined style={{ fontSize: 20 }}/>
+          <BranchesOutlined style={{ fontSize: 20 }} />
         </button>
       </div>
 
-      {/* 如果有节点被选中，就展示任务上下文 */}
+      {/* 如果有节点被选中,就展示任务上下文 */}
       {showContext && (
         <div
           style={{ display: "flex", flexDirection: "column", height: "100%" }}
@@ -232,6 +241,12 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges, noteId, noteName, fetchNo
               })
             }
             style={{ width: "100%", marginBottom: 16 }}
+            autoFocus={selectedNode.data.name === "新节点"}
+            ref={(input) => {
+              if (selectedNode.data.name === "新节点" && input) {
+                input.select();
+              }
+            }}
           />
           <TextArea
             value={selectedNode.data.context || ""}
@@ -242,6 +257,7 @@ const Editor: React.FC<EditorProps> = ({ nodes, edges, noteId, noteName, fetchNo
               })
             }
             style={{ flex: 1 }}
+            autoFocus={selectedNode.data.name !== "新节点"}
           />
         </div>
       )}
