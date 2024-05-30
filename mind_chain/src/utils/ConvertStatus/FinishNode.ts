@@ -77,6 +77,7 @@ export const FinishNode = (
 
       // 如果直接父节点的收敛节点和当前节点的收敛节点不是同一个节点,或者直接父节点只有一个直接子节点
       if (
+        !parentConvergenceNode ||
         parentConvergenceNode.id !== convergenceNode.id ||
         parentDirectChildNodes.length === 1
       ) {

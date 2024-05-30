@@ -264,8 +264,6 @@ export const addSiblingNode = (
         source: newNodeId.toString(),
         target: convergenceNode.id.toString(),
       });
-
-    setEdges(updatedEdges);
   } else {
     // 以当前节点为起点的线段
     const edgesFromCurrentNode = edges.filter(
@@ -279,7 +277,6 @@ export const addSiblingNode = (
         source: currentNode.id.toString(),
         target: newNodeId.toString(),
       });
-      setEdges(updatedEdges);
     } else if (edgesFromCurrentNode.length === 1) {
       // 7.无收敛节点,以当前节点为起点的线段数量=1，且这条线段的目标节点的level比当前节点更小
       const targetNode = nodes.find(
@@ -299,7 +296,6 @@ export const addSiblingNode = (
             target: targetNode.id.toString(),
           }
         );
-        setEdges(updatedEdges);
       } else {
         // 8.剩余情况
         const leafNodes = findLeafNodes(currentNode.id, nodes, edges);
@@ -309,7 +305,6 @@ export const addSiblingNode = (
           target: newNodeId,
         }));
         updatedEdges = edges.concat(newEdgesToSiblingNode);
-        setEdges(updatedEdges);
       }
     } else {
       // 8.剩余情况
@@ -320,10 +315,12 @@ export const addSiblingNode = (
         target: newNodeId,
       }));
       updatedEdges = edges.concat(newEdgesToSiblingNode);
-      setEdges(updatedEdges);
     }
   }
 
+  // 对edges去重
+  updatedEdges = dedupEdges(updatedEdges);
+  setEdges(updatedEdges);
   // 顺便流转新增的节点状态
   const updatedNodes = convertStatus([...nodes, newNode], updatedEdges);
   setNodes(updatedNodes);
@@ -440,4 +437,15 @@ export const addChildNode = (currentNode, nodes, setNodes, edges, setEdges) => {
     const updatedNodes = convertStatus([...nodes, newNode], updatedEdges);
     setNodes(updatedNodes);
   }
+};
+
+// 对edges去重
+const dedupEdges = (edges) => {
+  const uniqueEdges = {};
+
+  for (const edge of edges) {
+    uniqueEdges[edge.id] = edge;
+  }
+
+  return Object.values(uniqueEdges);
 };
