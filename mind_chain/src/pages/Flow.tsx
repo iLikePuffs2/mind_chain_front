@@ -140,10 +140,10 @@ const Flow = () => {
 
   // 检查阻塞时间
   useEffect(() => {
-    // 设置定时器,每分钟检查一次
+    // 设置定时器,每30s检查一次
     const intervalId = setInterval(() => {
       checkBlockedTime(nodes, setNodes, edges);
-    }, 60000);
+    }, 30000);
 
     // 在组件卸载时清除定时器
     return () => {

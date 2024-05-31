@@ -77,6 +77,23 @@ const Editor: React.FC<EditorProps> = ({
     }
   }, [contextNodes]);
 
+    // 切换到当前任务列表的快捷键(ctrl+4)
+    const handleKeyDown = (event) => {
+      if (event.ctrlKey && event.key === "4") {
+        event.preventDefault();
+        setIsCurrentTaskList(true);
+        setShowContext(false);
+      }
+    };
+  
+    // 在 useEffect 中添加键盘事件监听器
+    useEffect(() => {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }, []);
+
   const handleNameChange = (e) => {
     setSelectedNode({
       ...selectedNode,

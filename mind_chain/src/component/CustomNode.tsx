@@ -72,8 +72,8 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
                 setFinishedMap
               );
               break;
-            // ctrl+4 解除阻塞
-            case "4":
+            // ctrl+5 解除阻塞
+            case "5":
               unblock(selectedNode.data, nodes, setNodes, edges);
               break;
             // ctrl+← 提高优先级
