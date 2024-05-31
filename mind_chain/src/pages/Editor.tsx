@@ -163,33 +163,65 @@ const Editor: React.FC<EditorProps> = ({
   // 渲染任务上下文的文本框
   const renderContextTextAreas = () => {
     const parentNodes = findParentNodes(selectedNode);
-    const allContextsNull = parentNodes.every(
-      (node) => node.data.context === null
-    );
+    const allContextsNull = parentNodes.every((node) => node.data.context === null);
+
+    const handleParentContextChange = (nodeId, context) => {
+      const updatedNodes = contextNodes.map((node) => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              context: context,
+            },
+          };
+        }
+        return node;
+      });
+      setNodes(updatedNodes);
+    };
 
     return (
       <>
-        <TextArea
-          key={`textarea-${selectedNode.id}`}
-          ref={textAreaRef}
-          defaultValue={selectedNode.data.context || ""}
-          onChange={handleContextChange}
+        <div
           style={{
+            display: "flex",
+            flexDirection: "column",
             height:
               parentNodes.length === 0 || allContextsNull ? "100%" : "50%",
-            marginBottom: 16,
+            marginBottom: parentNodes.length > 0 ? 16 : 0,
           }}
-          autoFocus={!!selectedNode.data.name}
-        />
+        >
+          <TextArea
+            key={`textarea-${selectedNode.id}`}
+            ref={textAreaRef}
+            defaultValue={selectedNode.data.context || ""}
+            onChange={handleContextChange}
+            style={{ flex: 1 }}
+            autoFocus={!!selectedNode.data.name}
+          />
+        </div>
         {parentNodes.map(
           (node) =>
             node.data.context && (
-              <TextArea
+              <div
                 key={`textarea-${node.id}`}
-                defaultValue={`${node.data.label}：\n${node.data.context}`}
-                style={{ flex: 1, marginBottom: 16 }}
-                // readOnly
-              />
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  flex: 1,
+                  marginBottom: 16,
+                }}
+              >
+                <div style={{ marginBottom: 8, fontSize: 15 }}>
+                  {node.data.label}：
+                </div>
+                <TextArea
+                  defaultValue={node.data.context}
+                  style={{ flex: 1 }}
+                  onChange={(e) => handleParentContextChange(node.id, e.target.value)}
+                />
+              </div>
             )
         )}
       </>
@@ -303,6 +335,13 @@ const Editor: React.FC<EditorProps> = ({
     }
   };
 
+  // 按下向下的方向键，就会让光标从节点名字移动到上下文那里
+  const handleInputKeyDown = (e) => {
+    if (e.key === 'ArrowDown' && textAreaRef.current) {
+      textAreaRef.current.focus();
+    }
+  };
+
   return (
     <div className="text-container">
       <div className="button-container">
@@ -337,9 +376,11 @@ const Editor: React.FC<EditorProps> = ({
             ref={inputRef}
             defaultValue={selectedNode.data.name}
             onChange={handleNameChange}
-            style={{ width: "100%", marginBottom: 16 }}
+            style={{ width: "100%", marginBottom: 16, fontSize: 15 }}
             autoFocus={!selectedNode.data.name}
+            onKeyDown={handleInputKeyDown}
           />
+          {/* 渲染任务上下文的文本框 */}
           {renderContextTextAreas()}
         </div>
       )}
