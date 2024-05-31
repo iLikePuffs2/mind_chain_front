@@ -160,6 +160,72 @@ const Editor: React.FC<EditorProps> = ({
     }
   }, [selectedNode]);
 
+  // 渲染任务上下文的文本框
+  const renderContextTextAreas = () => {
+    const parentNodes = findParentNodes(selectedNode);
+    const allContextsNull = parentNodes.every(
+      (node) => node.data.context === null
+    );
+
+    return (
+      <>
+        <TextArea
+          key={`textarea-${selectedNode.id}`}
+          ref={textAreaRef}
+          defaultValue={selectedNode.data.context || ""}
+          onChange={handleContextChange}
+          style={{
+            height:
+              parentNodes.length === 0 || allContextsNull ? "100%" : "50%",
+            marginBottom: 16,
+          }}
+          autoFocus={!!selectedNode.data.name}
+        />
+        {parentNodes.map(
+          (node) =>
+            node.data.context && (
+              <TextArea
+                key={`textarea-${node.id}`}
+                defaultValue={`${node.data.label}：\n${node.data.context}`}
+                style={{ flex: 1, marginBottom: 16 }}
+                // readOnly
+              />
+            )
+        )}
+      </>
+    );
+  };
+
+  // 获取当前节点的父节点列表
+  const findParentNodes = (node) => {
+    const parentNodes = [];
+
+    const findParent = (currentNode) => {
+      const incomingEdges = contextEdges.filter(
+        (edge) => edge.target === currentNode.id
+      );
+
+      const parentNodeId = incomingEdges[0].source;
+      const parentNode = contextNodes.find((node) => node.id === parentNodeId);
+
+      if (
+        incomingEdges.length === 1 &&
+        currentNode.data.level !== 1 &&
+        parentNode &&
+        parentNode.data.level < currentNode.data.level
+      ) {
+        if (parentNode) {
+          parentNodes.push(parentNode);
+          findParent(parentNode);
+        }
+      }
+    };
+
+    findParent(node);
+
+    return parentNodes;
+  };
+
   /* 接收一个节点 ID 作为参数，遍历 contextNodes 数组，将与该 ID 匹配的节点的 selected 值设为 true，
   其他节点的 selected 值设为 false */
   const handleSelectNode = (nodeId: number) => {
@@ -274,14 +340,7 @@ const Editor: React.FC<EditorProps> = ({
             style={{ width: "100%", marginBottom: 16 }}
             autoFocus={!selectedNode.data.name}
           />
-          <TextArea
-            key={`textarea-${selectedNode.id}`}
-            ref={textAreaRef}
-            defaultValue={selectedNode.data.context || ""}
-            onChange={handleContextChange}
-            style={{ flex: 1 }}
-            autoFocus={!!selectedNode.data.name}
-          />
+          {renderContextTextAreas()}
         </div>
       )}
 
