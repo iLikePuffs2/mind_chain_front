@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useCallback } from "react";
 import { Handle, Position, NodeToolbar } from "reactflow";
 import {
   PlusCircleOutlined,
@@ -37,6 +37,90 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
   const [showBlockReasonPop, setShowBlockReasonPop] = useState(false);
   const [blockReason, setBlockReason] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  // 使用快捷键流转节点状态
+  const handleKeyDown = useCallback(
+    (event) => {
+      if (event.ctrlKey) {
+        const selectedNode = nodes.find((node) => node.selected);
+        if (selectedNode) {
+          event.preventDefault();
+          switch (event.key) {
+            // ctrl+1 新增子节点
+            case "1":
+              addChildNode(selectedNode.data, nodes, setNodes, edges, setEdges);
+              break;
+            // ctrl+2 新增同级节点(向下)
+            case "2":
+              addUnderSiblingNode(
+                selectedNode.data,
+                nodes,
+                setNodes,
+                edges,
+                setEdges
+              );
+              break;
+            // ctrl+3 完成节点
+            case "3":
+              FinishNode(
+                selectedNode.data,
+                nodes,
+                setNodes,
+                edges,
+                setEdges,
+                finishedMap,
+                setFinishedMap
+              );
+              break;
+            // // ctrl+4 事件阻塞
+            // case "4":
+            //   setShowBlockReasonPop(true);
+            //   break;
+            // // ctrl+5 时间阻塞
+            // case "5":
+            //   setShowDatePicker(true);
+            //   break;
+            // ctrl+6 解除阻塞
+            case "6":
+              unblock(selectedNode.data, nodes, setNodes, edges);
+              break;
+            // ctrl+← 提高优先级
+            case "ArrowLeft":
+              decreasePriority(
+                selectedNode.data,
+                nodes,
+                edges,
+                setNodes,
+                setEdges
+              );
+              break;
+            // ctrl+→ 降低优先级
+            case "ArrowRight":
+              increasePriority(
+                selectedNode.data,
+                nodes,
+                edges,
+                setNodes,
+                setEdges
+              );
+              break;
+            default:
+              break;
+          }
+        }
+      }
+    },
+    [nodes, setNodes, edges, setEdges, finishedMap, setFinishedMap]
+  );
+
+  // 根据快捷键的变化，触发不同事件
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleKeyDown]);
 
   const plusMenu = (
     <Menu>
@@ -148,21 +232,6 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
     return null;
   };
 
-  // useEffect(() => {
-  //   const handleKeyDown = (event) => {
-  //     if (event.ctrlKey && event.key === "1") {
-  //       event.preventDefault();
-  //       addChildNode(data, nodes, setNodes, edges, setEdges);
-  //     }
-  //   };
-
-  //   window.addEventListener("keydown", handleKeyDown);
-
-  //   return () => {
-  //     window.removeEventListener("keydown", handleKeyDown);
-  //   };
-  // }, [data, nodes, setNodes, edges, setEdges]);
-
   return (
     <div className="node" style={style}>
       <NodeToolbar isVisible={selected} position={Position.Right}>
@@ -172,6 +241,7 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
           </Dropdown>
           {!isRoot && (
             <>
+              {/* 完成节点 */}
               <CheckCircleOutlined
                 style={{ fontSize: 20 }}
                 onClick={() =>
