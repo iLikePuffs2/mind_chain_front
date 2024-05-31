@@ -1,5 +1,6 @@
 import { getDirectParentNodes } from "./CalculateStatus";
 import { getDirectChildNodes } from "./CalculateStatus";
+import { LayoutAlgorithm } from "../Other/LayoutAlgorithm";
 
 /**
  * 手动增加节点优先级
@@ -7,7 +8,13 @@ import { getDirectChildNodes } from "./CalculateStatus";
  * @param nodes 节点数组
  * @param edges 边数组
  */
-export const increasePriority = (data, nodes: Node[], edges: Edge[]) => {
+export const increasePriority = (
+  data,
+  nodes: Node[],
+  edges: Edge[],
+  setNodes,
+  setEdges
+) => {
   // 找到当前节点
   const currentNode = nodes.find((node) => node.data.id === data.id);
   // 获取当前节点的直接父节点
@@ -32,10 +39,18 @@ export const increasePriority = (data, nodes: Node[], edges: Edge[]) => {
         higherPriorityNode.data.priority--;
 
         // 更新节点数组
-        const currentNodeIndex = nodes.findIndex((node) => node.id === currentNode.id);
+        const currentNodeIndex = nodes.findIndex(
+          (node) => node.id === currentNode.id
+        );
         nodes[currentNodeIndex] = currentNode;
-        const higherPriorityNodeIndex = nodes.findIndex((node) => node.id === higherPriorityNode.id);
+        const higherPriorityNodeIndex = nodes.findIndex(
+          (node) => node.id === higherPriorityNode.id
+        );
         nodes[higherPriorityNodeIndex] = higherPriorityNode;
+
+        const layouted = LayoutAlgorithm(nodes, edges);
+        setNodes([...layouted.nodes]);
+        setEdges([...layouted.edges]);
       }
     }
   });
@@ -47,7 +62,13 @@ export const increasePriority = (data, nodes: Node[], edges: Edge[]) => {
  * @param nodes 节点数组
  * @param edges 边数组
  */
-export const decreasePriority = (data, nodes: Node[], edges: Edge[]) => {
+export const decreasePriority = (
+  data,
+  nodes: Node[],
+  edges: Edge[],
+  setNodes,
+  setEdges
+) => {
   // 找到当前节点
   const currentNode = nodes.find((node) => node.data.id === data.id);
   // 获取当前节点的直接父节点
@@ -72,10 +93,18 @@ export const decreasePriority = (data, nodes: Node[], edges: Edge[]) => {
         lowerPriorityNode.data.priority++;
 
         // 更新节点数组
-        const currentNodeIndex = nodes.findIndex((node) => node.id === currentNode.id);
+        const currentNodeIndex = nodes.findIndex(
+          (node) => node.id === currentNode.id
+        );
         nodes[currentNodeIndex] = currentNode;
-        const lowerPriorityNodeIndex = nodes.findIndex((node) => node.id === lowerPriorityNode.id);
+        const lowerPriorityNodeIndex = nodes.findIndex(
+          (node) => node.id === lowerPriorityNode.id
+        );
         nodes[lowerPriorityNodeIndex] = lowerPriorityNode;
+
+        const layouted = LayoutAlgorithm(nodes, edges);
+        setNodes([...layouted.nodes]);
+        setEdges([...layouted.edges]);
       }
     }
   });
