@@ -56,11 +56,18 @@ const Editor: React.FC<EditorProps> = ({
     const selected = contextNodes.find((node) => node.selected);
     setSelectedNode(selected || null);
     setShowContext(selected && selected.id !== "0");
-
+  
     // 在选中节点发生变化时,更新 Input 和 TextArea 的值
     if (selected && inputRef.current && textAreaRef.current) {
       inputRef.current.value = selected.data.name;
       textAreaRef.current.value = selected.data.context || "";
+  
+      // 如果 selectedNode.data.name 存在,将光标移动到 textarea 的末尾
+      if (selected.data.name) {
+        const textarea = textAreaRef.current.resizableTextArea.textArea;
+        textarea.focus();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      }
     }
   }, [contextNodes]);
 
@@ -198,7 +205,6 @@ const Editor: React.FC<EditorProps> = ({
             defaultValue={selectedNode.data.context || ""}
             onChange={handleContextChange}
             style={{ flex: 1 }}
-            autoFocus={!!selectedNode.data.name}
           />
         </div>
         {parentNodes.map(
