@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Handle, Position, NodeToolbar } from "reactflow";
 import {
   PlusCircleOutlined,
@@ -147,6 +147,21 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
     }
     return null;
   };
+
+  // useEffect(() => {
+  //   const handleKeyDown = (event) => {
+  //     if (event.ctrlKey && event.key === "1") {
+  //       event.preventDefault();
+  //       addChildNode(data, nodes, setNodes, edges, setEdges);
+  //     }
+  //   };
+
+  //   window.addEventListener("keydown", handleKeyDown);
+
+  //   return () => {
+  //     window.removeEventListener("keydown", handleKeyDown);
+  //   };
+  // }, [data, nodes, setNodes, edges, setEdges]);
 
   return (
     <div className="node" style={style}>

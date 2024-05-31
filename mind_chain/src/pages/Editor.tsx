@@ -56,17 +56,20 @@ const Editor: React.FC<EditorProps> = ({
     const selected = contextNodes.find((node) => node.selected);
     setSelectedNode(selected || null);
     setShowContext(selected && selected.id !== "0");
-  
+
     // 在选中节点发生变化时,更新 Input 和 TextArea 的值
     if (selected && inputRef.current && textAreaRef.current) {
       inputRef.current.value = selected.data.name;
       textAreaRef.current.value = selected.data.context || "";
-  
+
       // 如果 selectedNode.data.name 存在,将光标移动到 textarea 的末尾
       if (selected.data.name) {
         const textarea = textAreaRef.current.resizableTextArea.textArea;
         textarea.focus();
-        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        textarea.setSelectionRange(
+          textarea.value.length,
+          textarea.value.length
+        );
       }
     }
   }, [contextNodes]);
@@ -170,7 +173,9 @@ const Editor: React.FC<EditorProps> = ({
   // 渲染任务上下文的文本框
   const renderContextTextAreas = () => {
     const parentNodes = findParentNodes(selectedNode);
-    const allContextsNull = parentNodes.every((node) => node.data.context === null);
+    const allContextsNull = parentNodes.every(
+      (node) => node.data.context === null
+    );
 
     const handleParentContextChange = (nodeId, context) => {
       const updatedNodes = contextNodes.map((node) => {
@@ -225,7 +230,9 @@ const Editor: React.FC<EditorProps> = ({
                 <TextArea
                   defaultValue={node.data.context}
                   style={{ flex: 1 }}
-                  onChange={(e) => handleParentContextChange(node.id, e.target.value)}
+                  onChange={(e) =>
+                    handleParentContextChange(node.id, e.target.value)
+                  }
                 />
               </div>
             )
@@ -236,6 +243,11 @@ const Editor: React.FC<EditorProps> = ({
 
   // 获取当前节点的父节点列表
   const findParentNodes = (node) => {
+    // 如果contextEdges里没有以node为target的线段,就直接返回空数组
+    if (!contextEdges.some((edge) => edge.target === node.id)) {
+      return [];
+    }
+
     const parentNodes = [];
 
     const findParent = (currentNode) => {
@@ -343,7 +355,7 @@ const Editor: React.FC<EditorProps> = ({
 
   // 按下向下的方向键，就会让光标从节点名字移动到上下文那里
   const handleInputKeyDown = (e) => {
-    if (e.key === 'ArrowDown' && textAreaRef.current) {
+    if (e.key === "ArrowDown" && textAreaRef.current) {
       textAreaRef.current.focus();
     }
   };

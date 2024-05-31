@@ -75,14 +75,14 @@ export const LayoutAlgorithm = (nodes: Node[], edges: Edge[]) => {
   // 修改节点的一系列状态
   convertStatus(uniqueLayoutedNodes, edges);
 
-    // 根据priority交换横坐标
-    const adjustedNodes = changeNodePositionByPriority(
-      uniqueLayoutedNodes,
-      edges
-    );
+  // 根据priority交换横坐标
+  const adjustedNodes = changeNodePositionByPriority(
+    uniqueLayoutedNodes,
+    edges
+  );
 
   // 让大小不一的节点依旧保持合理的横坐标
   adjustNodePositionX(uniqueLayoutedNodes, edges);
-  
+
   return { nodes: adjustedNodes, edges };
 };
