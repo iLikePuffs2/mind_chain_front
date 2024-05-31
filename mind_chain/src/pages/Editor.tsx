@@ -62,8 +62,11 @@ const Editor: React.FC<EditorProps> = ({
       inputRef.current.value = selected.data.name;
       textAreaRef.current.value = selected.data.context || "";
 
-      // 如果 selectedNode.data.name 存在,将光标移动到 textarea 的末尾
-      if (selected.data.name) {
+      // 如果 selectedNode.data.name 存在,且当前光标不在 input,将光标移动到 textarea 的末尾
+      if (
+        selected.data.name &&
+        document.activeElement !== inputRef.current.input
+      ) {
         const textarea = textAreaRef.current.resizableTextArea.textArea;
         textarea.focus();
         textarea.setSelectionRange(
