@@ -118,6 +118,7 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
     </Menu>
   );
 
+  // 时间阻塞
   const handleDatePickerChange = (value) => {
     if (value) {
       data.blockedTime = value.toDate();
@@ -207,6 +208,7 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
         onOk={() => {
           if (blockReason) {
             data.blockedReason = blockReason;
+            // 事件阻塞
             blockNode(data, nodes, setNodes, edges, "3");
           }
           setShowBlockReasonPop(false);
