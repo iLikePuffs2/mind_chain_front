@@ -122,7 +122,7 @@ const Flow = () => {
   useEffect(() => {
     const userId = sessionStorage.getItem("userId");
 
-    // 设置定时器,每隔半小时自动保存一次
+    // 设置定时器,每隔30min自动保存一次
     const intervalId = setInterval(() => {
       saveAndUpdateNote(
         userId,

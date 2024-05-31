@@ -72,16 +72,8 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
                 setFinishedMap
               );
               break;
-            // // ctrl+4 事件阻塞
-            // case "4":
-            //   setShowBlockReasonPop(true);
-            //   break;
-            // // ctrl+5 时间阻塞
-            // case "5":
-            //   setShowDatePicker(true);
-            //   break;
-            // ctrl+6 解除阻塞
-            case "6":
+            // ctrl+4 解除阻塞
+            case "4":
               unblock(selectedNode.data, nodes, setNodes, edges);
               break;
             // ctrl+← 提高优先级
