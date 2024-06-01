@@ -351,6 +351,26 @@ const Editor: React.FC<EditorProps> = ({
       selected: node.id === String(nodeId),
     }));
     setNodes(updatedNodes);
+  
+    // 在选中节点发生变化时,更新 Input 和 TextArea 的值
+    const selected = updatedNodes.find((node) => node.selected);
+    if (selected && inputRef.current && textAreaRef.current) {
+      inputRef.current.value = selected.data.name;
+      textAreaRef.current.value = selected.data.context || "";
+  
+      // 如果 selected.data.name 存在,且当前光标不在 input,将光标移动到 textarea 的末尾
+      if (
+        selected.data.name &&
+        document.activeElement !== inputRef.current.input
+      ) {
+        const textarea = textAreaRef.current.resizableTextArea.textArea;
+        textarea.focus();
+        textarea.setSelectionRange(
+          textarea.value.length,
+          textarea.value.length
+        );
+      }
+    }
   };
 
   const handleHistoryClick = async () => {
