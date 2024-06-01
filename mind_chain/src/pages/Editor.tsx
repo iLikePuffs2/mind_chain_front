@@ -93,16 +93,16 @@ const Editor: React.FC<EditorProps> = ({
       event.key === "a" &&
       (document.activeElement === inputRef.current.input ||
         document.activeElement ===
-          textAreaRef.current.resizableTextArea.textArea ||
-        // 检查当前焦点是否在父节点的 textarea 上
-        parentNodes.some(
-          (node) =>
-            document.activeElement ===
-            document.querySelector(`#textarea-${node.id} textarea`)
-        ))
+          textAreaRef.current.resizableTextArea.textArea)
     ) {
       event.preventDefault();
       document.activeElement.select();
+    } else if (
+      (event.ctrlKey && event.key === "c") ||
+      (event.ctrlKey && event.key === "v")
+    ) {
+      // 允许 Ctrl+C 复制和 Ctrl+V 粘贴
+      return;
     }
   };
 
@@ -220,6 +220,20 @@ const Editor: React.FC<EditorProps> = ({
       (node) => node.data.context === null || node.data.context.trim() === ""
     );
 
+    // 处理父节点 textarea 的键盘事件
+    const handleParentTextareaKeyDown = (event) => {
+      if (event.ctrlKey && event.key === "a") {
+        event.preventDefault();
+        event.target.select();
+      } else if (
+        (event.ctrlKey && event.key === "c") ||
+        (event.ctrlKey && event.key === "v")
+      ) {
+        // 允许 Ctrl+C 复制和 Ctrl+V 粘贴
+        return;
+      }
+    };
+
     // 处理父节点context变更的函数
     const handleParentContextChange = (nodeId, context) => {
       const updatedNodes = contextNodes.map((node) => {
@@ -267,7 +281,6 @@ const Editor: React.FC<EditorProps> = ({
             node.data.context.trim() !== "" && (
               <div
                 key={`textarea-${node.id}`}
-                id={`textarea-${node.id}`}
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -286,6 +299,7 @@ const Editor: React.FC<EditorProps> = ({
                   onChange={(e) =>
                     handleParentContextChange(node.id, e.target.value)
                   }
+                  onKeyDown={handleParentTextareaKeyDown} // 添加键盘事件处理函数
                 />
               </div>
             )
