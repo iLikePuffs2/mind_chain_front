@@ -44,60 +44,68 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
       if (event.ctrlKey) {
         const selectedNode = nodes.find((node) => node.selected);
         if (selectedNode) {
-          event.preventDefault();
-          switch (event.key) {
-            // ctrl+1 新增子节点
-            case "1":
-              addChildNode(selectedNode.data, nodes, setNodes, edges, setEdges);
-              break;
-            // ctrl+2 新增同级节点(向下)
-            case "2":
-              addUnderSiblingNode(
-                selectedNode.data,
-                nodes,
-                setNodes,
-                edges,
-                setEdges
-              );
-              break;
-            // ctrl+3 完成节点
-            case "3":
-              FinishNode(
-                selectedNode.data,
-                nodes,
-                setNodes,
-                edges,
-                setEdges,
-                finishedMap,
-                setFinishedMap
-              );
-              break;
-            // ctrl+5 解除阻塞
-            case "5":
-              unblock(selectedNode.data, nodes, setNodes, edges);
-              break;
-            // ctrl+← 提高优先级
-            case "ArrowLeft":
-              decreasePriority(
-                selectedNode.data,
-                nodes,
-                edges,
-                setNodes,
-                setEdges
-              );
-              break;
-            // ctrl+→ 降低优先级
-            case "ArrowRight":
-              increasePriority(
-                selectedNode.data,
-                nodes,
-                edges,
-                setNodes,
-                setEdges
-              );
-              break;
-            default:
-              break;
+          if (event.key !== "c" && event.key !== "v" && event.key !== "a") {
+            event.preventDefault();
+            switch (event.key) {
+              // ctrl+1 新增子节点
+              case "1":
+                addChildNode(
+                  selectedNode.data,
+                  nodes,
+                  setNodes,
+                  edges,
+                  setEdges
+                );
+                break;
+              // ctrl+2 新增同级节点(向下)
+              case "2":
+                addUnderSiblingNode(
+                  selectedNode.data,
+                  nodes,
+                  setNodes,
+                  edges,
+                  setEdges
+                );
+                break;
+              // ctrl+3 完成节点
+              case "3":
+                FinishNode(
+                  selectedNode.data,
+                  nodes,
+                  setNodes,
+                  edges,
+                  setEdges,
+                  finishedMap,
+                  setFinishedMap
+                );
+                break;
+              // ctrl+5 解除阻塞
+              case "5":
+                unblock(selectedNode.data, nodes, setNodes, edges);
+                break;
+              // ctrl+← 提高优先级
+              case "ArrowLeft":
+                decreasePriority(
+                  selectedNode.data,
+                  nodes,
+                  edges,
+                  setNodes,
+                  setEdges
+                );
+                break;
+              // ctrl+→ 降低优先级
+              case "ArrowRight":
+                increasePriority(
+                  selectedNode.data,
+                  nodes,
+                  edges,
+                  setNodes,
+                  setEdges
+                );
+                break;
+              default:
+                break;
+            }
           }
         }
       }

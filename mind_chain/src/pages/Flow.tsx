@@ -152,40 +152,42 @@ const Flow = () => {
   }, [nodes, setNodes]);
 
   // 使用快捷键进行界面重排和保存
-const handleKeyDown = useCallback(
-  (event) => {
-    if (event.ctrlKey) {
-      event.preventDefault();
-      switch (event.key) {
-        // ctrl+s 保存笔记
-        case "s":
-          saveAndUpdateNote(
-            userId,
-            selectedNote?.id || "",
-            selectedNote?.name || "",
-            nodes
-          );
-          break;
-        // ctrl+q 重新排布
-        case "q":
-          handleLayout(nodes, edges);
-          break;
-        default:
-          break;
+  const handleKeyDown = useCallback(
+    (event) => {
+      if (event.ctrlKey) {
+        if (event.key !== "c" && event.key !== "v" && event.key !== "a") {
+          event.preventDefault();
+          switch (event.key) {
+            // ctrl+s 保存笔记
+            case "s":
+              saveAndUpdateNote(
+                userId,
+                selectedNote?.id || "",
+                selectedNote?.name || "",
+                nodes
+              );
+              break;
+            // ctrl+q 重新排布
+            case "q":
+              handleLayout(nodes, edges);
+              break;
+            default:
+              break;
+          }
+        }
       }
-    }
-  },
-  [userId, selectedNote, nodes, edges]
-);
+    },
+    [userId, selectedNote, nodes, edges]
+  );
 
-// 根据快捷键的变化,触发不同事件
-useEffect(() => {
-  window.addEventListener("keydown", handleKeyDown);
+  // 根据快捷键的变化,触发不同事件
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
 
-  return () => {
-    window.removeEventListener("keydown", handleKeyDown);
-  };
-}, [handleKeyDown]);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleKeyDown]);
 
   // 重新排布
   const handleLayout = (nodes, edges) => {
