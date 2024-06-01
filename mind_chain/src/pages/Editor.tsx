@@ -65,7 +65,7 @@ const Editor: React.FC<EditorProps> = ({
 
       // 如果 selectedNode.data.name 存在,且当前光标不在 input,将光标移动到 textarea 的末尾
       if (
-        !hasExecuted && // 新增的条件
+        !hasExecuted && // 新增的条件(保证输入的时候光标不会一直移动)
         selected.data.name &&
         document.activeElement !== inputRef.current.input
       ) {

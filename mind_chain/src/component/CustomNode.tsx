@@ -59,49 +59,59 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
                 break;
               // ctrl+2 新增同级节点(向下)
               case "2":
-                addUnderSiblingNode(
-                  selectedNode.data,
-                  nodes,
-                  setNodes,
-                  edges,
-                  setEdges
-                );
+                if (selectedNode.data.level > 1) {
+                  addUnderSiblingNode(
+                    selectedNode.data,
+                    nodes,
+                    setNodes,
+                    edges,
+                    setEdges
+                  );
+                }
                 break;
               // ctrl+3 完成节点
               case "3":
-                FinishNode(
-                  selectedNode.data,
-                  nodes,
-                  setNodes,
-                  edges,
-                  setEdges,
-                  finishedMap,
-                  setFinishedMap
-                );
+                if (selectedNode.data.level > 0) {
+                  FinishNode(
+                    selectedNode.data,
+                    nodes,
+                    setNodes,
+                    edges,
+                    setEdges,
+                    finishedMap,
+                    setFinishedMap
+                  );
+                }
                 break;
               // ctrl+5 解除阻塞
               case "5":
-                unblock(selectedNode.data, nodes, setNodes, edges);
+                if (selectedNode.data.level > 0) {
+                  unblock(selectedNode.data, nodes, setNodes, edges);
+                }
                 break;
               // ctrl+← 提高优先级
               case "ArrowLeft":
-                decreasePriority(
-                  selectedNode.data,
-                  nodes,
-                  edges,
-                  setNodes,
-                  setEdges
-                );
+                if (selectedNode.data.level > 0) {
+                  decreasePriority(
+                    selectedNode.data,
+                    nodes,
+                    edges,
+                    setNodes,
+                    setEdges
+                  );
+                }
                 break;
               // ctrl+→ 降低优先级
               case "ArrowRight":
-                increasePriority(
-                  selectedNode.data,
-                  nodes,
-                  edges,
-                  setNodes,
-                  setEdges
-                );
+                if (selectedNode.data.level > 0) {
+                  increasePriority(
+                    selectedNode.data,
+                    nodes,
+                    edges,
+                    setNodes,
+                    setEdges
+                  );
+                }
                 break;
               default:
                 break;
