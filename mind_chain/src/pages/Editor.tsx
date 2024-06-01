@@ -51,36 +51,45 @@ const Editor: React.FC<EditorProps> = ({
   const userId = sessionStorage.getItem("userId");
   const inputRef = useRef(null);
   const textAreaRef = useRef(null);
-  const [hasExecuted, setHasExecuted] = useState(false);
-
+  const [prevSelectedNodeId, setPrevSelectedNodeId] = useState(null);
+  const [shouldUpdateInputs, setShouldUpdateInputs] = useState(false);
+  
   useEffect(() => {
     const selected = contextNodes.find((node) => node.selected);
     setSelectedNode(selected || null);
     setShowContext(selected && selected.id !== "0");
-
-    // 在选中节点发生变化时,更新 Input 和 TextArea 的值
-    if (selected && inputRef.current && textAreaRef.current) {
+  
+    // 如果选中的节点发生变化,将 shouldUpdateInputs 设置为 true
+    if (selected && selected.id !== prevSelectedNodeId) {
+      setShouldUpdateInputs(true);
+      setPrevSelectedNodeId(selected.id);
+    }
+  }, [contextNodes, prevSelectedNodeId]);
+  
+  useEffect(() => {
+    const selected = contextNodes.find((node) => node.selected);
+  
+    // 在选中节点发生变化,并且 shouldUpdateInputs 为 true 时,更新 Input 和 TextArea 的值
+    if (
+      selected &&
+      inputRef.current &&
+      textAreaRef.current &&
+      shouldUpdateInputs
+    ) {
       inputRef.current.value = selected.data.name;
       textAreaRef.current.value = selected.data.context || "";
-
+  
       // 如果 selectedNode.data.name 存在,且当前光标不在 input,将光标移动到 textarea 的末尾
-      if (
-        !hasExecuted && // 新增的条件(保证输入的时候光标不会一直移动)
-        selected.data.name &&
-        document.activeElement !== inputRef.current.input
-      ) {
+      if (selected.data.name && document.activeElement !== inputRef.current.input) {
         const textarea = textAreaRef.current.resizableTextArea.textArea;
         textarea.focus();
-        textarea.setSelectionRange(
-          textarea.value.length,
-          textarea.value.length
-        );
-        setHasExecuted(true); // 标记为已执行
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
       }
-    } else {
-      setHasExecuted(false); // 当选中节点变化时,重置标记
+  
+      // 重置 shouldUpdateInputs 为 false
+      setShouldUpdateInputs(false);
     }
-  }, [contextNodes]);
+  }, [contextNodes, shouldUpdateInputs]);
 
   // 切换到当前任务列表的快捷键(ctrl+4)
   const handleKeyDown = (event) => {
