@@ -155,7 +155,12 @@ const Flow = () => {
   const handleKeyDown = useCallback(
     (event) => {
       if (event.ctrlKey) {
-        if (event.key !== "c" && event.key !== "v" && event.key !== "a") {
+        if (
+          event.key !== "c" &&
+          event.key !== "v" &&
+          event.key !== "a" &&
+          event.key !== "f"
+        ) {
           event.preventDefault();
           switch (event.key) {
             // ctrl+s 保存笔记

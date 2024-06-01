@@ -44,7 +44,7 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
       if (event.ctrlKey) {
         const selectedNode = nodes.find((node) => node.selected);
         if (selectedNode) {
-          if (event.key !== "c" && event.key !== "v" && event.key !== "a") {
+          if (event.key !== "c" && event.key !== "v" && event.key !== "a" && event.key !== "f") {
             event.preventDefault();
             switch (event.key) {
               // ctrl+1 新增子节点

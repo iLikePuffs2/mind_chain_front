@@ -236,7 +236,8 @@ const Editor: React.FC<EditorProps> = ({
         event.target.select();
       } else if (
         (event.ctrlKey && event.key === "c") ||
-        (event.ctrlKey && event.key === "v")
+        (event.ctrlKey && event.key === "v") ||
+        (event.ctrlKey && event.key === "f")
       ) {
         // 允许 Ctrl+C 复制和 Ctrl+V 粘贴
         return;

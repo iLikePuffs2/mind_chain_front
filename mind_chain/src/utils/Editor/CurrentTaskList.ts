@@ -6,13 +6,13 @@
  */
 export const getCurrentTaskList = (nodes, edges) => {
   // 创建一个数组用于存储当前任务节点
-  const currentTasks = [];
+  let currentTasks = [];
 
   // 创建一个 Map 用于存储父任务和其子任务
   const parentTasks = new Map();
 
   // 前序遍历查找当前任务节点
-  const preorderFindTasks = (nodeId) => {
+  const preorderFindTasks = (nodeId, currentTasks = []) => {
     // 根据节点 ID 查找对应的节点对象
     const node = nodes.find((node) => node.id === nodeId);
 
@@ -21,17 +21,25 @@ export const getCurrentTaskList = (nodes, edges) => {
       currentTasks.push(node);
     }
 
-    // 查找以当前节点为源节点的所有边
-    const childEdges = edges.filter((edge) => edge.source === nodeId);
+    // 查找以当前节点为源节点的所有边,并按照目标节点的 position.x 值进行排序
+    const childEdges = edges
+      .filter((edge) => edge.source === nodeId)
+      .sort((a, b) => {
+        const nodeA = nodes.find((node) => node.id === a.target);
+        const nodeB = nodes.find((node) => node.id === b.target);
+        return nodeA.position.x - nodeB.position.x;
+      });
 
     // 递归遍历每个子节点
     childEdges.forEach((edge) => {
-      preorderFindTasks(edge.target);
+      preorderFindTasks(edge.target, currentTasks);
     });
+
+    return currentTasks;
   };
 
   // 从根节点(ID 为 "0" 的节点)开始前序遍历
-  preorderFindTasks("0");
+  currentTasks = preorderFindTasks("0");
 
   // 递归查找给定节点的父任务节点,返回经历的所有父节点的名字
   const findParentTaskNames = (nodeId, parentNames = []) => {
@@ -66,7 +74,10 @@ export const getCurrentTaskList = (nodes, edges) => {
       parentTasks.set(task.id, [task]);
     } else {
       // 否则查找任务节点的父任务节点
-      const parentTask = nodes.find((node) => node.id === edges.find((edge) => edge.target === task.id).source);
+      const parentTask = nodes.find(
+        (node) =>
+          node.id === edges.find((edge) => edge.target === task.id).source
+      );
 
       // 如果找到了父任务节点
       if (parentTask) {
