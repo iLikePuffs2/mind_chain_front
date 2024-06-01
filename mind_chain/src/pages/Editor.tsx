@@ -51,6 +51,7 @@ const Editor: React.FC<EditorProps> = ({
   const userId = sessionStorage.getItem("userId");
   const inputRef = useRef(null);
   const textAreaRef = useRef(null);
+  const [hasExecuted, setHasExecuted] = useState(false);
 
   useEffect(() => {
     const selected = contextNodes.find((node) => node.selected);
@@ -64,6 +65,7 @@ const Editor: React.FC<EditorProps> = ({
 
       // 如果 selectedNode.data.name 存在,且当前光标不在 input,将光标移动到 textarea 的末尾
       if (
+        !hasExecuted && // 新增的条件
         selected.data.name &&
         document.activeElement !== inputRef.current.input
       ) {
@@ -73,26 +75,44 @@ const Editor: React.FC<EditorProps> = ({
           textarea.value.length,
           textarea.value.length
         );
+        setHasExecuted(true); // 标记为已执行
       }
+    } else {
+      setHasExecuted(false); // 当选中节点变化时,重置标记
     }
   }, [contextNodes]);
 
-    // 切换到当前任务列表的快捷键(ctrl+4)
-    const handleKeyDown = (event) => {
-      if (event.ctrlKey && event.key === "4") {
-        event.preventDefault();
-        setIsCurrentTaskList(true);
-        setShowContext(false);
-      }
+  // 切换到当前任务列表的快捷键(ctrl+4)
+  const handleKeyDown = (event) => {
+    if (event.ctrlKey && event.key === "4") {
+      event.preventDefault();
+      setIsCurrentTaskList(true);
+      setShowContext(false);
+    } else if (
+      event.ctrlKey &&
+      event.key === "a" &&
+      (document.activeElement === inputRef.current.input ||
+        document.activeElement ===
+          textAreaRef.current.resizableTextArea.textArea ||
+        // 检查当前焦点是否在父节点的 textarea 上
+        parentNodes.some(
+          (node) =>
+            document.activeElement ===
+            document.querySelector(`#textarea-${node.id} textarea`)
+        ))
+    ) {
+      event.preventDefault();
+      document.activeElement.select();
+    }
+  };
+
+  // 在 useEffect 中添加键盘事件监听器
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  
-    // 在 useEffect 中添加键盘事件监听器
-    useEffect(() => {
-      window.addEventListener("keydown", handleKeyDown);
-      return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-      };
-    }, []);
+  }, []);
 
   const handleNameChange = (e) => {
     setSelectedNode({
@@ -192,11 +212,15 @@ const Editor: React.FC<EditorProps> = ({
 
   // 渲染任务上下文的文本框
   const renderContextTextAreas = () => {
+    // 获取当前选中节点的父节点列表
     const parentNodes = findParentNodes(selectedNode);
-    const allContextsNull = parentNodes.every(
-      (node) => node.data.context === null
+
+    // 检查所有父节点的context是否为空(null或空字符串)
+    const allContextsEmpty = parentNodes.every(
+      (node) => node.data.context === null || node.data.context.trim() === ""
     );
 
+    // 处理父节点context变更的函数
     const handleParentContextChange = (nodeId, context) => {
       const updatedNodes = contextNodes.map((node) => {
         if (node.id === nodeId) {
@@ -219,11 +243,14 @@ const Editor: React.FC<EditorProps> = ({
           style={{
             display: "flex",
             flexDirection: "column",
+            // 如果没有父节点或所有父节点的context都为空,则当前节点的文本框占满整个高度,否则占50%高度
             height:
-              parentNodes.length === 0 || allContextsNull ? "100%" : "50%",
+              parentNodes.length === 0 || allContextsEmpty ? "100%" : "50%",
+            // 如果有父节点,则在当前节点的文本框下方添加一些间距
             marginBottom: parentNodes.length > 0 ? 16 : 0,
           }}
         >
+          {/* 当前选中节点的文本框 */}
           <TextArea
             key={`textarea-${selectedNode.id}`}
             ref={textAreaRef}
@@ -232,11 +259,15 @@ const Editor: React.FC<EditorProps> = ({
             style={{ flex: 1 }}
           />
         </div>
+        {/* 渲染父节点的文本框 */}
         {parentNodes.map(
           (node) =>
-            node.data.context && (
+            // 只渲染context不为空(null或空字符串)的父节点
+            node.data.context &&
+            node.data.context.trim() !== "" && (
               <div
                 key={`textarea-${node.id}`}
+                id={`textarea-${node.id}`}
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -244,9 +275,11 @@ const Editor: React.FC<EditorProps> = ({
                   marginBottom: 16,
                 }}
               >
+                {/* 父节点的标题 */}
                 <div style={{ marginBottom: 8, fontSize: 15 }}>
                   {node.data.label}：
                 </div>
+                {/* 父节点的文本框 */}
                 <TextArea
                   defaultValue={node.data.context}
                   style={{ flex: 1 }}
