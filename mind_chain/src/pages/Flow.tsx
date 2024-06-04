@@ -159,7 +159,9 @@ const Flow = () => {
           event.key !== "c" &&
           event.key !== "v" &&
           event.key !== "a" &&
-          event.key !== "f"
+          event.key !== "f" &&
+          event.key !== "z" &&
+          event.key !== "x"
         ) {
           event.preventDefault();
           switch (event.key) {

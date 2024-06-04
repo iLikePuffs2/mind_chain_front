@@ -53,22 +53,22 @@ const Editor: React.FC<EditorProps> = ({
   const textAreaRef = useRef(null);
   const [prevSelectedNodeId, setPrevSelectedNodeId] = useState(null);
   const [shouldUpdateInputs, setShouldUpdateInputs] = useState(false);
-  
+
   useEffect(() => {
     const selected = contextNodes.find((node) => node.selected);
     setSelectedNode(selected || null);
     setShowContext(selected && selected.id !== "0");
-  
+
     // 如果选中的节点发生变化,将 shouldUpdateInputs 设置为 true
     if (selected && selected.id !== prevSelectedNodeId) {
       setShouldUpdateInputs(true);
       setPrevSelectedNodeId(selected.id);
     }
   }, [contextNodes, prevSelectedNodeId]);
-  
+
   useEffect(() => {
     const selected = contextNodes.find((node) => node.selected);
-  
+
     // 在选中节点发生变化,并且 shouldUpdateInputs 为 true 时,更新 Input 和 TextArea 的值
     if (
       selected &&
@@ -78,14 +78,20 @@ const Editor: React.FC<EditorProps> = ({
     ) {
       inputRef.current.value = selected.data.name;
       textAreaRef.current.value = selected.data.context || "";
-  
+
       // 如果 selectedNode.data.name 存在,且当前光标不在 input,将光标移动到 textarea 的末尾
-      if (selected.data.name && document.activeElement !== inputRef.current.input) {
+      if (
+        selected.data.name &&
+        document.activeElement !== inputRef.current.input
+      ) {
         const textarea = textAreaRef.current.resizableTextArea.textArea;
         textarea.focus();
-        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        textarea.setSelectionRange(
+          textarea.value.length,
+          textarea.value.length
+        );
       }
-  
+
       // 重置 shouldUpdateInputs 为 false
       setShouldUpdateInputs(false);
     }
@@ -231,16 +237,18 @@ const Editor: React.FC<EditorProps> = ({
 
     // 处理父节点 textarea 的键盘事件
     const handleParentTextareaKeyDown = (event) => {
-      if (event.ctrlKey && event.key === "a") {
-        event.preventDefault();
-        event.target.select();
-      } else if (
-        (event.ctrlKey && event.key === "c") ||
-        (event.ctrlKey && event.key === "v") ||
-        (event.ctrlKey && event.key === "f")
-      ) {
-        // 允许 Ctrl+C 复制和 Ctrl+V 粘贴
-        return;
+      if (event.ctrlKey) {
+        if (
+          event.key !== "c" &&
+          event.key !== "v" &&
+          event.key !== "a" &&
+          event.key !== "f" &&
+          event.key !== "z" &&
+          event.key !== "x"
+        ) {
+          event.preventDefault();
+          event.target.select();
+        }
       }
     };
 
@@ -361,13 +369,13 @@ const Editor: React.FC<EditorProps> = ({
       selected: node.id === String(nodeId),
     }));
     setNodes(updatedNodes);
-  
+
     // 在选中节点发生变化时,更新 Input 和 TextArea 的值
     const selected = updatedNodes.find((node) => node.selected);
     if (selected && inputRef.current && textAreaRef.current) {
       inputRef.current.value = selected.data.name;
       textAreaRef.current.value = selected.data.context || "";
-  
+
       // 如果 selected.data.name 存在,且当前光标不在 input,将光标移动到 textarea 的末尾
       if (
         selected.data.name &&
