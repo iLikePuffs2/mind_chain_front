@@ -105,11 +105,11 @@ export const getCurrentTaskList = (nodes, edges) => {
       // 查找任务节点经历的所有父节点的名字
       const parentNames = findParentTaskNames(task.id);
 
-      // 将任务添加到任务列表中,包括任务名称、父任务名称(如果有)以及节点数据
+      // 将任务添加到任务列表中,包括任务名称、父任务名称(如果有)以及节点数据(每一项都有这三个参数)
       taskList.push({
-        task: `${taskIndex}. ${task.data.name}`, // 在任务名称前面添加数字序号
-        parent: parentNames,
-        nodeData: task.data,
+        task: `${taskIndex}. ${task.data.name}`, // 任务名称(包含数字序号)
+        parent: parentNames, // 父节点路径
+        nodeData: task.data, // node.data的数据
       });
 
       taskIndex++; // 递增任务序号

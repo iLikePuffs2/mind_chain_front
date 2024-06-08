@@ -526,8 +526,8 @@ const Editor: React.FC<EditorProps> = ({
       )}
 
       {!showContext && (
+        // 当前任务列表里每一行展示的内容
         <List
-          // size="small"
           bordered
           dataSource={taskList}
           renderItem={(item: any) => (
@@ -556,7 +556,8 @@ const Editor: React.FC<EditorProps> = ({
               ]}
             >
               <Typography.Text strong>{item.task}</Typography.Text>
-              {item.blockInfo && ` (${item.blockInfo})`} ({item.parent})
+              {item.blockInfo && ` (${item.blockInfo})`}
+              {item.nodeData?.level !== 1 && `（${item.parent}）`}
             </List.Item>
           )}
           style={{ marginTop: 16 }}
