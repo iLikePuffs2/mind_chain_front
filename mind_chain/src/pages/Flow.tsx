@@ -31,6 +31,10 @@ export const NodesEdgesContext = createContext({
   setEdges: () => {},
   finishedMap: new Map(),
   setFinishedMap: () => {},
+  recoveryNodes: [],
+  setRecoveryNodes: () => {},
+  recoveryEdges: [],
+  setRecoveryEdges: () => {},
 });
 
 const nodeTypes = {
@@ -53,6 +57,8 @@ const Flow = () => {
   const [renameNoteName, setRenameNoteName] = useState("");
   const [selectedNoteName, setSelectedNoteName] = useState("");
   const [selectedNote, setSelectedNote] = useState(null);
+  const [recoveryNodes, setRecoveryNodes] = useState([]);
+  const [recoveryEdges, setRecoveryEdges] = useState([]);
   const userId = sessionStorage.getItem("userId");
 
   // 根节点的初始值
@@ -177,6 +183,13 @@ const Flow = () => {
             // ctrl+q 重新排布
             case "q":
               handleLayout(nodes, edges);
+              break;
+            case "r":
+              // 交换当前的nodes和edges与recoveryNodes和recoveryEdges
+              setNodes(recoveryNodes);
+              setEdges(recoveryEdges);
+              setRecoveryNodes(nodes);
+              setRecoveryEdges(edges);
               break;
             default:
               break;
@@ -404,7 +417,18 @@ const Flow = () => {
 
   return (
     <NodesEdgesContext.Provider
-      value={{ nodes, setNodes, edges, setEdges, finishedMap, setFinishedMap }}
+      value={{
+        nodes,
+        setNodes,
+        edges,
+        setEdges,
+        finishedMap,
+        setFinishedMap,
+        recoveryNodes,
+        setRecoveryNodes,
+        recoveryEdges,
+        setRecoveryEdges,
+      }}
     >
       <div className="app-container">
         <ReactFlowProvider>

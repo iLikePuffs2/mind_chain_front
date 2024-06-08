@@ -40,6 +40,8 @@ const Editor: React.FC<EditorProps> = ({
     setEdges,
     finishedMap,
     setFinishedMap,
+    setRecoveryNodes,
+    setRecoveryEdges,
   } = useContext(NodesEdgesContext);
   const [taskList, setTaskList] = useState([]);
   const [isCurrentTaskList, setIsCurrentTaskList] = useState(true);
@@ -196,7 +198,9 @@ const Editor: React.FC<EditorProps> = ({
       contextEdges,
       setEdges,
       finishedMap,
-      setFinishedMap
+      setFinishedMap,
+      setRecoveryNodes,
+      setRecoveryEdges
     );
     setNodes(updatedNodes);
     setEdges(updatedEdges);

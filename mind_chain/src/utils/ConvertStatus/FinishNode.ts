@@ -12,8 +12,14 @@ export const FinishNode = (
   edges,
   setEdges,
   finishedMap,
-  setFinishedMap
+  setFinishedMap,
+  setRecoveryNodes,
+  setRecoveryEdges,
 ) => {
+  // 将当前的nodes和edges存储到Context中
+  setRecoveryNodes([...nodes]);
+  setRecoveryEdges([...edges]);
+
   const currentNodeObj = nodes.find((node) => node.data.id === currentNode.id);
 
   // 寻找当前节点下方的非同级收敛节点

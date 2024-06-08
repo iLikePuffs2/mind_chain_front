@@ -32,8 +32,16 @@ import {
 
 const CustomNode = ({ data, isConnectable, selected, style }) => {
   const { label, isRoot, blockedReason, blockedTime } = data;
-  const { nodes, setNodes, edges, setEdges, finishedMap, setFinishedMap } =
-    useContext(NodesEdgesContext);
+  const {
+    nodes,
+    setNodes,
+    edges,
+    setEdges,
+    finishedMap,
+    setFinishedMap,
+    setRecoveryNodes,
+    setRecoveryEdges,
+  } = useContext(NodesEdgesContext);
   const [showBlockReasonPop, setShowBlockReasonPop] = useState(false);
   const [blockReason, setBlockReason] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -86,7 +94,9 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
                     edges,
                     setEdges,
                     finishedMap,
-                    setFinishedMap
+                    setFinishedMap,
+                    setRecoveryNodes,
+                    setRecoveryEdges,
                   );
                 }
                 break;
@@ -269,7 +279,9 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
                     edges,
                     setEdges,
                     finishedMap,
-                    setFinishedMap
+                    setFinishedMap,
+                    setRecoveryNodes,
+                    setRecoveryEdges
                   )
                 }
               />
