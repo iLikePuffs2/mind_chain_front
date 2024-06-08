@@ -274,6 +274,13 @@ const Editor: React.FC<EditorProps> = ({
       setNodes(updatedNodes);
     };
 
+    const handleTextareaKeyDown = (e) => {
+      if (e.key === "ArrowUp" && e.target.selectionStart === 0) {
+        e.preventDefault();
+        inputRef.current.focus();
+      }
+    };
+
     return (
       <>
         <div
@@ -294,6 +301,7 @@ const Editor: React.FC<EditorProps> = ({
             defaultValue={selectedNode.data.context || ""}
             onChange={handleContextChange}
             style={{ flex: 1 }}
+            onKeyDown={handleTextareaKeyDown}
           />
         </div>
         {/* 渲染父节点的文本框 */}
