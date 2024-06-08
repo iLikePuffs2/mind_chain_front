@@ -59,10 +59,13 @@ const Editor: React.FC<EditorProps> = ({
     setSelectedNode(selected || null);
     setShowContext(selected && selected.id !== "0");
 
-    // 如果选中的节点发生变化,将 shouldUpdateInputs 设置为 true
+    // 如果当前存在选中的节点，且它发生了变化
     if (selected && selected.id !== prevSelectedNodeId) {
       setShouldUpdateInputs(true);
       setPrevSelectedNodeId(selected.id);
+    } else if (!selected) {
+      // 如果当前不存在选中的节点，下次也要更新input的焦点
+      setShouldUpdateInputs(true);
     }
   }, [contextNodes, prevSelectedNodeId]);
 
