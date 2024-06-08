@@ -69,7 +69,6 @@ const Editor: React.FC<EditorProps> = ({
   useEffect(() => {
     const selected = contextNodes.find((node) => node.selected);
 
-    // 在选中节点发生变化,并且 shouldUpdateInputs 为 true 时,更新 Input 和 TextArea 的值
     if (
       selected &&
       inputRef.current &&
@@ -79,20 +78,11 @@ const Editor: React.FC<EditorProps> = ({
       inputRef.current.value = selected.data.name;
       textAreaRef.current.value = selected.data.context || "";
 
-      // 如果 selectedNode.data.name 存在,且当前光标不在 input,将光标移动到 textarea 的末尾
-      if (
-        selected.data.name &&
-        document.activeElement !== inputRef.current.input
-      ) {
-        const textarea = textAreaRef.current.resizableTextArea.textArea;
-        textarea.focus();
-        textarea.setSelectionRange(
-          textarea.value.length,
-          textarea.value.length
-        );
-      }
+      // 将光标移动到 input 的最后一个字符之后
+      const input = inputRef.current.input;
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
 
-      // 重置 shouldUpdateInputs 为 false
       setShouldUpdateInputs(false);
     }
   }, [contextNodes, shouldUpdateInputs]);
@@ -130,17 +120,29 @@ const Editor: React.FC<EditorProps> = ({
   }, []);
 
   const handleNameChange = (e) => {
-    setSelectedNode({
-      ...selectedNode,
-      data: { ...selectedNode.data, name: e.target.value },
+    const updatedNodes = contextNodes.map((node) => {
+      if (node.selected) {
+        return {
+          ...node,
+          data: { ...node.data, name: e.target.value, label: e.target.value },
+        };
+      }
+      return node;
     });
+    setNodes(updatedNodes);
   };
 
   const handleContextChange = (e) => {
-    setSelectedNode({
-      ...selectedNode,
-      data: { ...selectedNode.data, context: e.target.value },
+    const updatedNodes = contextNodes.map((node) => {
+      if (node.selected) {
+        return {
+          ...node,
+          data: { ...node.data, context: e.target.value },
+        };
+      }
+      return node;
     });
+    setNodes(updatedNodes);
   };
 
   useEffect(() => {
