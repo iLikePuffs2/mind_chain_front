@@ -160,44 +160,36 @@ const Flow = () => {
   // 使用快捷键进行界面重排和保存
   const handleKeyDown = useCallback(
     (event) => {
-      if (event.ctrlKey) {
-        if (
-          event.key !== "c" &&
-          event.key !== "v" &&
-          event.key !== "a" &&
-          event.key !== "f" &&
-          event.key !== "z" &&
-          event.key !== "x"
-        ) {
-          event.preventDefault();
-          switch (event.key) {
-            // ctrl+s 保存笔记
-            case "s":
-              saveAndUpdateNote(
-                userId,
-                selectedNote?.id || "",
-                selectedNote?.name || "",
-                nodes
-              );
-              break;
-            // ctrl+q 重新排布
-            case "q":
-              handleLayout(nodes, edges);
-              break;
-            case "r":
-              // 交换当前的nodes和edges与recoveryNodes和recoveryEdges
-              setNodes(recoveryNodes);
-              setEdges(recoveryEdges);
-              setRecoveryNodes(nodes);
-              setRecoveryEdges(edges);
-              break;
-            default:
-              break;
-          }
+      if (event.altKey) {
+        event.preventDefault();
+        switch (event.key) {
+          // alt+s 保存笔记
+          case "s":
+            saveAndUpdateNote(
+              userId,
+              selectedNote?.id || "",
+              selectedNote?.name || "",
+              nodes
+            );
+            break;
+          // alt+w 重新排布
+          case "w":
+            handleLayout(nodes, edges);
+            break;
+          // alt+r 恢复上一次的节点和边
+          case "r":
+            // 交换当前的nodes和edges与recoveryNodes和recoveryEdges
+            setNodes(recoveryNodes);
+            setEdges(recoveryEdges);
+            setRecoveryNodes(nodes);
+            setRecoveryEdges(edges);
+            break;
+          default:
+            break;
         }
       }
     },
-    [userId, selectedNote, nodes, edges]
+    [userId, selectedNote, nodes, edges, recoveryNodes, recoveryEdges]
   );
 
   // 根据快捷键的变化,触发不同事件

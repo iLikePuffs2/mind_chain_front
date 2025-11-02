@@ -49,90 +49,81 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
   // 使用快捷键流转节点状态
   const handleKeyDown = useCallback(
     (event) => {
-      if (event.ctrlKey) {
+      if (event.altKey) {
         const selectedNode = nodes.find((node) => node.selected);
         if (selectedNode) {
-          if (
-            event.key !== "c" &&
-            event.key !== "v" &&
-            event.key !== "a" &&
-            event.key !== "f" &&
-            event.key !== "z" &&
-            event.key !== "x"
-          ) {
-            event.preventDefault();
-            switch (event.key) {
-              // ctrl+1 新增子节点
-              case "1":
-                addChildNode(
+          event.preventDefault();
+          switch (event.key) {
+            // alt+1 新增子节点
+            case "1":
+              addChildNode(
+                selectedNode.data,
+                nodes,
+                setNodes,
+                edges,
+                setEdges
+              );
+              break;
+            // alt+2 新增同级节点(向下)
+            case "2":
+              if (selectedNode.data.level > 1) {
+                addUnderSiblingNode(
                   selectedNode.data,
                   nodes,
                   setNodes,
                   edges,
                   setEdges
                 );
-                break;
-              // ctrl+2 新增同级节点(向下)
-              case "2":
-                if (selectedNode.data.level > 1) {
-                  addUnderSiblingNode(
-                    selectedNode.data,
-                    nodes,
-                    setNodes,
-                    edges,
-                    setEdges
-                  );
-                }
-                break;
-              // ctrl+3 完成节点
-              case "3":
-                if (selectedNode.data.level > 0) {
-                  FinishNode(
-                    selectedNode.data,
-                    nodes,
-                    setNodes,
-                    edges,
-                    setEdges,
-                    finishedMap,
-                    setFinishedMap,
-                    setRecoveryNodes,
-                    setRecoveryEdges,
-                  );
-                }
-                break;
-              // ctrl+5 解除阻塞
-              case "5":
-                if (selectedNode.data.level > 0) {
-                  unblock(selectedNode.data, nodes, setNodes, edges);
-                }
-                break;
-              // ctrl+← 提高优先级
-              case "ArrowLeft":
-                if (selectedNode.data.level > 0) {
-                  decreasePriority(
-                    selectedNode.data,
-                    nodes,
-                    edges,
-                    setNodes,
-                    setEdges
-                  );
-                }
-                break;
-              // ctrl+→ 降低优先级
-              case "ArrowRight":
-                if (selectedNode.data.level > 0) {
-                  increasePriority(
-                    selectedNode.data,
-                    nodes,
-                    edges,
-                    setNodes,
-                    setEdges
-                  );
-                }
-                break;
-              default:
-                break;
-            }
+              }
+              break;
+            // alt+3 完成节点
+            case "3":
+              if (selectedNode.data.level > 0) {
+                FinishNode(
+                  selectedNode.data,
+                  nodes,
+                  setNodes,
+                  edges,
+                  setEdges,
+                  finishedMap,
+                  setFinishedMap,
+                  setRecoveryNodes,
+                  setRecoveryEdges,
+                );
+              }
+              break;
+            // alt+5 解除阻塞
+            case "5":
+              if (selectedNode.data.level > 0) {
+                unblock(selectedNode.data, nodes, setNodes, edges);
+              }
+              break;
+            // alt+← 提高优先级
+            case "ArrowLeft":
+              if (selectedNode.data.level > 0) {
+                decreasePriority(
+                  selectedNode.data,
+                  nodes,
+                  edges,
+                  setNodes,
+                  setEdges
+                );
+              }
+              break;
+            // alt+→ 降低优先级
+            case "ArrowRight":
+              if (selectedNode.data.level > 0) {
+                increasePriority(
+                  selectedNode.data,
+                  nodes,
+                  edges,
+                  setNodes,
+                  setEdges
+                );
+              }
+              break;
+            default:
+              break;
           }
         }
       }
@@ -140,7 +131,7 @@ const CustomNode = ({ data, isConnectable, selected, style }) => {
     [nodes, setNodes, edges, setEdges, finishedMap, setFinishedMap]
   );
 
-  // 根据快捷键的变化，触发不同事件
+  // 根据快捷键的变化,触发不同事件
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
 

@@ -92,14 +92,14 @@ const Editor: React.FC<EditorProps> = ({
     }
   }, [contextNodes, shouldUpdateInputs]);
 
-  // 切换到当前任务列表的快捷键(ctrl+4)
+  // 切换到当前任务列表的快捷键(alt+4)
   const handleKeyDown = (event) => {
-    if (event.ctrlKey && event.key === "4") {
+    if (event.altKey && event.key === "4") {
       event.preventDefault();
       setIsCurrentTaskList(true);
       setShowContext(false);
     } else if (
-      event.ctrlKey &&
+      event.altKey &&
       event.key === "a" &&
       (document.activeElement === inputRef.current.input ||
         document.activeElement ===
@@ -108,8 +108,8 @@ const Editor: React.FC<EditorProps> = ({
       event.preventDefault();
       document.activeElement.select();
     } else if (
-      (event.ctrlKey && event.key === "c") ||
-      (event.ctrlKey && event.key === "v")
+      (event.altKey && event.key === "c") ||
+      (event.altKey && event.key === "v")
     ) {
       // 允许 Ctrl+C 复制和 Ctrl+V 粘贴
       return;
@@ -246,7 +246,7 @@ const Editor: React.FC<EditorProps> = ({
 
     // 处理父节点 textarea 的键盘事件
     const handleParentTextareaKeyDown = (event) => {
-      if (event.ctrlKey) {
+      if (event.altKey) {
         if (
           event.key !== "c" &&
           event.key !== "v" &&
